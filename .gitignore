@@ -1,3 +1,13 @@
+#nxt files
+appflash.sh
+biosflash.sh
+kernel_cfg.c
+kernel_id.h
+*.bin
+*.map
+*.elf
+*.rxe
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
