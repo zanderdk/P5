@@ -7,6 +7,10 @@ kernel_id.h
 *.map
 *.elf
 *.rxe
+build
+rxeflash.sh
+ramboot.sh
+implementation.oil
 
 tags
 
