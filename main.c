@@ -4,23 +4,21 @@
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
+S32 Integrale = 0;
+S32 LastError = 0;
+S16 PID(S32, S32);
+
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
     void user_1ms_isr_type2(void){ /* do nothing */ }
 
     void ecrobot_device_initialize(void)
     {
-        ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM);
-        ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM);
-        ecrobot_init_sonar_sensor(NXT_PORT_S3);
-        ecrobot_init_sonar_sensor(NXT_PORT_S4);
+        nxt_motor_set_speed(NXT_PORT_A, 0, 1);
     }
     
     void ecrobot_device_terminate(void)
     {
-        ecrobot_term_dist_sensor(NXT_PORT_S1);
-        ecrobot_term_dist_sensor(NXT_PORT_S2);
-        ecrobot_term_sonar_sensor(NXT_PORT_S3);
-        ecrobot_term_sonar_sensor(NXT_PORT_S4);
+    	nxt_motor_set_speed(NXT_PORT_A, 0, 1);
     }
 
 
@@ -29,24 +27,48 @@
       while(1){
 
     	  display_goto_xy(0, 0);
-    	  display_string("Distance 1:");
-    	  display_goto_xy(1, 1);
-          display_int(ecrobot_get_dist_sensor(NXT_PORT_S1), 5);
-          display_goto_xy(0,2);
-          display_string("Distance 2:");
-          display_goto_xy(1,3);
-          display_int(ecrobot_get_dist_sensor(NXT_PORT_S2), 5);
-          display_goto_xy(0,4);
-          display_string("Sonar 1:");
-          display_goto_xy(1,5);
-          display_int(ecrobot_get_sonar_sensor(NXT_PORT_S3), 5);
-          display_goto_xy(0,6);
-          display_string("Sonar 2:");
-          display_goto_xy(1,7);
-          display_int(ecrobot_get_sonar_sensor(NXT_PORT_S4), 5);
-    	  ecrobot_set_motor_mode_speed(NXT_PORT_A, 0, 5);
+    	  S32 Current = nxt_motor_get_count(NXT_PORT_A);
+    	  S16 getSpeed = PID(270, Current);
+    	  if(getSpeed < 50 && getSpeed > 0)
+    	  {
+    		  getSpeed = 50;
+    	  }
+    	  else if(getSpeed > -50 && getSpeed < 0)
+    	  {
+    		  getSpeed = -50;
+    	  }
+    	  nxt_motor_set_speed(NXT_PORT_A, getSpeed, 0);
+    	  display_int(getSpeed, 10);
+
     	  display_update();
 
     	  systick_wait_ms(200);
       }
+    }
+
+    S16 PID(S32 target, S32 current)
+    {
+    	S32 Kp = 1;
+    	S32 Ki = 0;
+    	S32 Kd = 0;
+    	S32 Error = target - current;
+    	display_int(Error, 4);
+    	systick_wait_ms(10000);
+    	S32 Derivative = Error - LastError;
+    	Integrale = Integrale + Error;
+    	S32 Speed = Error * Kp + Ki*Integrale + Kd*Derivative;
+    	Speed = Speed / 1000;
+    	LastError = Error;
+    	if(Speed > 100)
+    	{
+    		return 100;
+    	}
+    	else if(Speed < -100)
+    	{
+    		return -100;
+    	}
+    	else
+    	{
+    		return Speed;
+    	}
     }
