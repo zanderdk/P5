@@ -51,7 +51,7 @@ S32 MotorPID(S32, U8);
     	S32 Current = nxt_motor_get_count(motor);
     	S32 getSpeed = PID(target, Current);
     	nxt_motor_set_speed(motor, getSpeed, 0);
-    	return getSpeed
+    	return getSpeed;
     }
 
     S32 PID(S32 target, S32 current)
@@ -65,6 +65,14 @@ S32 MotorPID(S32, U8);
     	Integrale = Integrale + Error;
     	S32 Speed = (S32)(Error * Kp + Ki*Integrale + Kd*Derivative);
     	LastError = Error;
+    	if(Speed < 50 && Speed > 0)
+    	{
+    	  Speed = 50 + Speed;
+    	}
+    	else if(Speed > -50 && Speed < 0)
+    	{
+    	  Speed = (Speed - 50);
+    	}
     	if(Speed > 100)
     	{
     		return 100;
@@ -75,14 +83,6 @@ S32 MotorPID(S32, U8);
     	}
     	else
     	{
-    		if(Speed < 50 && Speed > 0)
-    		{
-    			  Speed = 50 + Speed;
-    		}
-    		else if(Speed > -50 && Speed < 0)
-    		{
-    		  Speed = (Speed - 50);
-    		}
     		return Speed;
     	}
     }
