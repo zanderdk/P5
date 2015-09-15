@@ -14,12 +14,8 @@
 #define Ki 0.0000000075     // Ki
 
 
-
-
-S32 Integrale = 0;
-S32 LastError = 0;
-
 S32 PID(S32, S32);
+S32 MotorPID(S32, U8);
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
     void user_1ms_isr_type2(void){ /* do nothing */ }
@@ -40,18 +36,8 @@ S32 PID(S32, S32);
       while(1){
 
     	  display_goto_xy(0, 0);
-    	  S32 Current = nxt_motor_get_count(NXT_PORT_A);
-    	  S16 getSpeed = PID(360, Current);
-    	  if(getSpeed < 50 && getSpeed > 0)
-    	  {
-    		  getSpeed = 50 + getSpeed;
-    	  }
-    	  else if(getSpeed > -50 && getSpeed < 0)
-    	  {
-    		  getSpeed = (getSpeed - 50);
-    	  }
-    	  nxt_motor_set_speed(NXT_PORT_A, getSpeed, 0);
-    	  display_int(getSpeed, 10);
+
+    	  MotorPID(NXT_PORT_A, 360);
 
     	  display_update();
 
@@ -59,8 +45,21 @@ S32 PID(S32, S32);
       }
     }
 
+
+    S32 MotorPID(S32 target, U8 motor)
+    {
+    	S32 Current = nxt_motor_get_count(motor);
+    	S32 getSpeed = PID(target, Current);
+    	nxt_motor_set_speed(motor, getSpeed, 0);
+    	return getSpeed
+    }
+
     S32 PID(S32 target, S32 current)
     {
+    	static S32 Integrale = 0;
+    	static S32 LastError = 0;
+
+
     	S32 Error = target - current;
     	S32 Derivative = Error - LastError;
     	Integrale = Integrale + Error;
@@ -76,6 +75,14 @@ S32 PID(S32, S32);
     	}
     	else
     	{
+    		if(Speed < 50 && Speed > 0)
+    		{
+    			  Speed = 50 + Speed;
+    		}
+    		else if(Speed > -50 && Speed < 0)
+    		{
+    		  Speed = (Speed - 50);
+    		}
     		return Speed;
     	}
     }
