@@ -50,7 +50,7 @@ S32 ecrobot_get_dist_sensor(U8 port_id)
         return -1;
     
     dist[port_id] = (S32)((data[port_id][1] << 8) | data[port_id][0]);
-    ecrobot_read_i2c(port_id, 0x03, 0x42, data, 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x42, data[port_id], 2);
 
     return dist[port_id];
 }
