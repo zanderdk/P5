@@ -48,7 +48,7 @@ S32 PID(S32, S32);
     	  }
     	  else if(getSpeed > -50 && getSpeed < 0)
     	  {
-    		  getSpeed = -50 - getSpeed;
+    		  getSpeed = (getSpeed - 50);
     	  }
     	  nxt_motor_set_speed(NXT_PORT_A, getSpeed, 0);
     	  display_int(getSpeed, 10);
