@@ -44,7 +44,7 @@ void ecrobot_term_dist_sensor(U8 port_id)
 
 S32 ecrobot_get_dist_sensor(U8 port_id)
 {
-    static U8 data[4][2] = {0, 0};
+    static U8 data[4][2] = {{0, 0}};
        
     if(i2c_busy(port_id) != 0)
         return -1;
