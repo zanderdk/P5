@@ -11,13 +11,10 @@ S32 dist[4] = {-1, -1, -1, -1};
 void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range)
 {
     if(range == RANGE_SHORT)
-    {
         set_digi0(port_id);
-    }
-    if(range == RANGE_LONG)
-    {
+    else if(range == RANGE_LONG)
 	    unset_digi0(port_id);
-    }
+
 }
 
 U16 ecrobot_get_obstical_detection_sensor(U8 port_id)
@@ -37,9 +34,7 @@ void ecrobot_term_dist_sensor(U8 port_id)
     ecrobot_term_i2c(port_id);
     U8 i;
     for(i = 0; i < 4; i++)
-    {
         dist[i] = -1;
-    }
 }
 
 S32 ecrobot_get_dist_sensor(U8 port_id)

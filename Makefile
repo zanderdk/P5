@@ -2,7 +2,8 @@
 TARGET = main
 TARGET_SOURCES = \
 	dist_nx.c \
-	main.c
+	main.c \
+	PID.c
 TOPPERS_OSEK_OIL_SOURCE = ./main.oil
 
 # Don't modify below part
