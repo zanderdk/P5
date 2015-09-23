@@ -12,11 +12,14 @@
     void ecrobot_device_initialize(void)
     {
         nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+        ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM);
+        
     }
     
     void ecrobot_device_terminate(void)
     {
     	nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    	ecrobot_term_dist_sensor(NXT_PORT_S1);
     }
 
 
@@ -26,7 +29,9 @@
 
     	  display_goto_xy(0, 0);
 
-    	  MotorPID(360, NXT_PORT_A);
+    	  nxt_motor_set_speed(NXT_PORT_A, 50, 0);
+
+    	  ecrobot_get_dist_sensor(NXT_PORT_S1);
 
     	  display_update();
 
