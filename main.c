@@ -19,6 +19,7 @@
     {
         ecrobot_init_sonar_sensor(NXT_PORT_S1);
         ecrobot_init_sonar_sensor(NXT_PORT_S2);
+        ecrobot_set_motor_mode_speed(NXT_PORT_A,0,0);
         
     }
     
@@ -65,8 +66,22 @@ U8 directionCheck(S32 sensor1, S32 sensor2){
 
     	  display_goto_xy(0, 0);
 
+    	  static U8 t = 0;
+    	  if(t == 0)
+    		  MotorPID(285,NXT_PORT_A);
+
+    	  if(t == 1)
+    		  MotorPID(-5,NXT_PORT_A);
+
+    	  if(nxt_motor_get_count(NXT_PORT_A) > 280)
+    		  t = 1;
+
+    	  else if(nxt_motor_get_count(NXT_PORT_A) < 0)
+    		  t = 0;
+
+
     	  //display_int(directionCheck(ecrobot_get_sonar_sensor(NXT_PORT_S1), ecrobot_get_sonar_sensor(NXT_PORT_S2)), 1);
-    	  display_int(1, 1);
+    	  display_int(1, 10);
     	  display_update();
 
     	  systick_wait_ms(200);
