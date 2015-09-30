@@ -28,9 +28,9 @@
     	S32 speed = (S32)(error * Kp + Ki*(*integrale) + Kd*derivative);
     	*lastError = error;
 
-    	return (speed < 50 && speed > 0) ?
-            speed + 50 :
-            (speed > -50 && speed < 0) ?
-                speed - 50 :
+    	return (speed < 80 && speed > 0) ?
+            speed + 80 :
+            (speed > -80 && speed < 0) ?
+                speed - 80 :
                 speed;
     }
