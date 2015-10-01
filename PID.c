@@ -25,7 +25,7 @@
     	S32 error = target - current;
     	S32 derivative = error - *lastError;
     	*integrale = *integrale + error;
-    	F32 speed = error * Kp + Ki*(*integrale) + Kd*derivative;
+    	double speed = error * Kp + Ki*(*integrale) + Kd*derivative;
     	*lastError = error;
 
     	return (speed > 0) ?

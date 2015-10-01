@@ -6,7 +6,7 @@
 #include "dist_nx.h"
 #include "PID.h"
 
-
+#define ANGLE 60
 #define SAMPLESIZE 3
 #define WALL 100
 #define TARGET_NO 0
@@ -35,13 +35,13 @@ void sweep(){
 	static U8 t = 0;
 
 	if(t == 0)
-		MotorPID(100,NXT_PORT_A);
+		MotorPID((ANGLE+5),NXT_PORT_A);
 	else if(t == 1)
-		MotorPID(-10,NXT_PORT_A);
+		MotorPID(-(ANGLE+5),NXT_PORT_A);
 
-	if(nxt_motor_get_count(NXT_PORT_A) > 80)
+	if(nxt_motor_get_count(NXT_PORT_A) > ANGLE)
 		t = 1;
-	else if(nxt_motor_get_count(NXT_PORT_A) < 0)
+	else if(nxt_motor_get_count(NXT_PORT_A) < -ANGLE)
 		t = 0;
 }
 
@@ -113,9 +113,9 @@ U8 directionCheck(S32 sensorLeft, S32 sensorRight){
 
     	  if(direction == TARGET_NO)
     		  sweep();
-    	  else if(direction == TARGET_LEFT && nxt_motor_get_count(NXT_PORT_A) > 0)
+    	  else if(direction == TARGET_LEFT && nxt_motor_get_count(NXT_PORT_A) > -ANGLE)
     		  ecrobot_set_motor_speed(NXT_PORT_A,-80);
-    	  else if(direction == TARGET_RIGHT && nxt_motor_get_count(NXT_PORT_A) < 90)
+    	  else if(direction == TARGET_RIGHT && nxt_motor_get_count(NXT_PORT_A) < ANGLE)
     		  ecrobot_set_motor_speed(NXT_PORT_A,80);
     	  else
     		  ecrobot_set_motor_mode_speed(NXT_PORT_A,1,0);
