@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wcet>
+<program name="/datalogging/datalogging_rxe.elf" project="datalogging">
+<task addr="2117336" checksum="a88e1acb" label="ecrobot_get_sonar_sensor" name="ecrobot_get_sonar_sensor">
+<configuration CCLK="1" IN_RAM="1" MAM_fetch_cycle_timing="1" path_script="/opt/eclipse/dropins/otawa/eclipse/plugins/OTAWA_1.6.6/libotawa/share/Otawa/scripts/lpc2138.osx" processor_model="lpc2138"/>
+<flowfacts/>
+<unresolved/>
+</task>
+<filter active="true" type="0" value="_"/>
+</program>
+<source-manager>
+<path value=".."/>
+<path value="."/>
+<path value="/"/>
+</source-manager>
+</wcet>
