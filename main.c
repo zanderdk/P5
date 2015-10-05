@@ -4,15 +4,11 @@
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
-#include "PID.h"
+#include "PIDTarget.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
-#define WALL 100
-#define TARGET_NO 0
-#define TARGET_LEFT 1
-#define TARGET_RIGHT 2
-#define TARGET_CENTER 3
+
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
     void user_1ms_isr_type2(void){ /* do nothing */ }
@@ -30,7 +26,9 @@
     	ecrobot_term_sonar_sensor(NXT_PORT_S2);
     }
 
-void sweep(){
+
+
+/*void sweep(){
 
 	static U8 t = 0;
 
@@ -43,61 +41,7 @@ void sweep(){
 		t = 1;
 	else if(nxt_motor_get_count(NXT_PORT_A) < -ANGLE)
 		t = 0;
-}
-
-
-U8 directionCheck(S32 sensorLeft, S32 sensorRight){
-
-//	static S32 lcbuf[SAMPLESIZE] = {{0}};
-//	static S32 rcbuf[SAMPLESIZE] = {{0}};
-//	static S32 i = 0;
-//
-//	lcbuf[i] = sensor1;
-//	rcbuf[i] = sensor2;
-//
-//	i = (i == SAMPLESIZE-1) ? 0 : i+1;
-//
-//	S32 sensorLeft = 0;
-//	S32 sensorRight = 0;
-//
-//	U8 j;
-//	for(j = 0; j < SAMPLESIZE; j++){
-//		sensorLeft += lcbuf[j];
-//		sensorRight += rcbuf[j];
-//	}
-//
-//	sensorLeft = sensorLeft / SAMPLESIZE;
-//	sensorRight = sensorRight /SAMPLESIZE;
-
-//	static S32 sensorLeft = 0;
-//	static S32 sensorRight = 0;
-//
-//	static U8 lcount = 0;
-//	static U8 rcount = 0;
-//
-//	if(sensorL < WALL){
-//			sensorLeft = sensorL;
-//			lcount = 2;
-//		}
-//		else if(lcount == 0)
-//			sensorLeft = sensorL;
-//		else
-//			lcount = lcount-1;
-//
-//	if(sensorR < WALL){
-//			sensorRight = sensorR;
-//			rcount = 2;
-//		}
-//		else if(rcount == 0)
-//			sensorRight = sensorR;
-//		else
-//			rcount = rcount-1;
-
-
-	return (sensorLeft >= WALL && sensorRight >= WALL) ? TARGET_NO :
-			(sensorLeft < WALL && sensorRight >= WALL) ? TARGET_LEFT :
-			(sensorLeft >= WALL && sensorRight < WALL) ? TARGET_RIGHT : TARGET_CENTER;
-}
+}*/
 
 
     TASK(OSEK_Task_Background)
@@ -105,30 +49,46 @@ U8 directionCheck(S32 sensorLeft, S32 sensorRight){
       display_clear(1);
       while(1){
 
-    	  S32 sensor1 = ecrobot_get_sonar_sensor(NXT_PORT_S1);
-    	  S32 sensor2 = ecrobot_get_sonar_sensor(NXT_PORT_S2);
-
-    	  U8 direction = directionCheck(sensor1, sensor2);
-
+    	  S8 direction = directionCheck(NXT_PORT_S1, NXT_PORT_S2);
+    	  S32 speed = PIDTarget(direction);
 
     	  if(direction == TARGET_NO)
-    		  sweep();
-    	  else if(direction == TARGET_LEFT && nxt_motor_get_count(NXT_PORT_A) > -ANGLE)
-    		  ecrobot_set_motor_speed(NXT_PORT_A,-80);
-    	  else if(direction == TARGET_RIGHT && nxt_motor_get_count(NXT_PORT_A) < ANGLE)
-    		  ecrobot_set_motor_speed(NXT_PORT_A,80);
+    	  {
+    		  //sweep();
+    		  nxt_motor_set_speed(NXT_PORT_A, 0,0);
+    	  }
+    	  else if (speed > 0 && nxt_motor_get_count(NXT_PORT_A) < 90)
+    	  {
+    		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
+    	  }
+    	  else if (speed < 0 && nxt_motor_get_count(NXT_PORT_A) > -90)
+    	  {
+    		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
+    	  }
     	  else
-    		  ecrobot_set_motor_mode_speed(NXT_PORT_A,1,0);
-
+    	  {
+    		  nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    	  }
 
     	  display_goto_xy(0, 0);
-    	  display_int(sensor1,3);
+    	  	  	  display_string("Left:");
+    	  	  	  display_goto_xy(5,0);
+    	      	  display_int(ecrobot_get_sonar_sensor(NXT_PORT_S1),3);
 
-    	  display_goto_xy(0,1);
-    	  display_int(sensor2,3);
+    	      	  display_goto_xy(0,1);
+    	      	  display_string("Right:");
+    	      	  display_goto_xy(5,1);
+    	      	  display_int(ecrobot_get_sonar_sensor(NXT_PORT_S2),3);
 
-    	  display_goto_xy(0,2);
-    	  display_int(direction, 1);
+    	      	  display_goto_xy(0,2);
+    	      	  display_string("Speed:");
+    	      	  display_goto_xy(5,2);
+    	      	  display_int(PIDTarget(direction), 3);
+
+    	      	  display_goto_xy(0,3);
+    	      	  display_string("Direc:");
+    	      	  display_goto_xy(5,3);
+    	      	  display_int(direction, 2);
 
     	  display_update();
 
