@@ -10,7 +10,9 @@
 
         if(lastTarget[motor] != target)
         {
-            
+        	integrale[motor] = 0;
+        	lastError[motor] = 0;
+        	lastTarget[motor] = target;
         }
 
     	register S32 current = nxt_motor_get_count(motor);
