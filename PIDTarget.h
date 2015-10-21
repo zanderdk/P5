@@ -9,7 +9,7 @@
 #define TARGET_CENTER 0
 #define TARGET_RIGHT 1
 
-#define WALL 100
+#define WALL 500
 
 S8 directionCheck(S8, S8);
 S32 PIDTarget(S8);

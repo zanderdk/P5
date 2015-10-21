@@ -17,21 +17,26 @@
     void ecrobot_device_initialize(void)
     {
         ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
+        ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM, 0);
     }
     
     void ecrobot_device_terminate(void)
     {
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
+    	ecrobot_term_dist_sensor(NXT_PORT_S2);
     }
 
     TASK(OSEK_Task_Background)
     {
       while(1){
-    	  S32 sensor1 = (S32)ecrobot_get_dist_sensor(NXT_PORT_S1);
-          S32 val = (S32)sensor1;
+
+    	  S8 target = directionCheck(NXT_PORT_S1, NXT_PORT_S2);
+    	  S32 speed = PIDTarget(target);
+
+    	  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
 
     	  display_goto_xy(0, 0);
-    	  display_int(val,6);
+    	  display_int(target,1);
 
     	  display_update();
 
