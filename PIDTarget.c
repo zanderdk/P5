@@ -4,8 +4,8 @@
 
 S8 directionCheck(S8 sensor1, S8 sensor2){
 
-	S32 sensorLeft = ecrobot_get_dist_sensor(sensor1);
-	S32 sensorRight = ecrobot_get_dist_sensor(sensor2);
+	double sensorLeft = ecrobot_get_dist_sensor(sensor1);
+	double sensorRight = ecrobot_get_dist_sensor(sensor2);
 //	static S32 lcbuf[SAMPLESIZE] = {{0}};
 //	static S32 rcbuf[SAMPLESIZE] = {{0}};
 //	static S32 i = 0;

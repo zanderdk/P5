@@ -1,7 +1,7 @@
 #include "ecrobot_types.h"
 
 #define Kp 50
-#define Ki 5
+#define Ki 0.5
 #define Kd 25
 
 #define TARGET_NO 2

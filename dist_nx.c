@@ -8,7 +8,7 @@
 #include "dist_nx.h"
 
 double dist[4] = {-1, -1, -1, -1};
-U8 sen = 0;
+U8 sen[4] = {0,0,0,0};
 
 double func(long double x, long double a, long double b){
     return a/(pow(x, b));
@@ -24,7 +24,8 @@ double calc(long double x) {
     if(x > 643.784)
         return func(x, 1236340000000000000, 5.442282287396021);
     
-    return func(x, 10000700000000, 3.632572817825240); 
+    long double val = func(x, 10000700000000, 3.632572817825240);
+    return (val > 900)? 900 : val;
 }
 
 void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range)
@@ -47,7 +48,7 @@ U16 ecrobot_get_obstical_detection_sensor(U8 port_id)
 
 void ecrobot_init_dist_sensor(U8 port_id, U8 range, U8 sensor)
 {
-    sen = sensor;
+    sen[port_id] = sensor;
     U8 buf = 0x31 + range;
     ecrobot_init_i2c(port_id, LOWSPEED);
     ecrobot_send_i2c(port_id, 0x03, 0x41, &buf, 1);
@@ -65,17 +66,17 @@ void ecrobot_term_dist_sensor(U8 port_id)
 
 double ecrobot_get_dist_sensor(U8 port_id)
 {
-    static U8 data[2] = {0, 0};
+    static U8 data[4][2] = {{0, 0}};
        
     if(i2c_busy(port_id) != 0)
         return -1;
     
-    dist[port_id] = (double)((data[1] << 8) | data[0]);
+    dist[port_id] = (double)((data[port_id][1] << 8) | data[port_id][0]);
 
-    if(sen)
+    if(sen[port_id])
         dist[port_id] = calc(dist[port_id]);
 
-    ecrobot_read_i2c(port_id, 0x03, 0x42 + sen*2 , data, 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x42 + sen[port_id]*2 , data[port_id], 2);
 
     return dist[port_id];
 }

@@ -34,13 +34,20 @@
     	  S32 speed = PIDTarget(target);
 
     	  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
+          display_clear(1);
 
     	  display_goto_xy(0, 0);
-    	  display_int(target,1);
+    	  display_int(speed,1);
+
+          display_goto_xy(0, 1);
+          //display_int(ecrobot_get_dist_sensor(NXT_PORT_S1), 5);
+
+          display_goto_xy(0, 2);
+          //display_int(ecrobot_get_dist_sensor(NXT_PORT_S2), 5);
 
     	  display_update();
 
-    	  systick_wait_ms(50);
+    	  systick_wait_ms(10);
       }
     }
 
