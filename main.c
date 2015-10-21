@@ -16,7 +16,7 @@
 
     void ecrobot_device_initialize(void)
     {
-        ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM);
+        ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
     }
     
     void ecrobot_device_terminate(void)
