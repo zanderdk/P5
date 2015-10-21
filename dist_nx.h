@@ -7,9 +7,8 @@
 
 /* NXT medium range distance sensor API */
 extern void ecrobot_init_dist_sensor(U8 port_id, U8 range);
-extern  S32 ecrobot_get_dist_sensor(U8 port_id);
+extern double ecrobot_get_dist_sensor(U8 port_id);
 extern void ecrobot_term_dist_sensor(U8 port_id);
 extern U16 ecrobot_get_obstical_detection_sensor(U8 port_id);
 extern void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range);
-
-
+extern double calc(long double x);
