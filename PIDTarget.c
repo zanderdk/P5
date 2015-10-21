@@ -61,7 +61,7 @@ S32 PIDTarget(S8 target)
 {
 	static S32 lastError = 0;
 	static S32 integrale = 0;
-	static S8 noTarget = 0;
+	static S16 noTarget = 0;
 
 	if(target != TARGET_NO)
 	{
@@ -82,7 +82,8 @@ S32 PIDTarget(S8 target)
 		{
 			lastError = 0;
 			integrale = 0;
-			return 0;
+			noTarget = 0;
 		}
+		return 0;
 	}
 }

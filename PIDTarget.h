@@ -1,8 +1,8 @@
 #include "ecrobot_types.h"
 
-#define Kp 50
+#define Kp 10
 #define Ki 0.5
-#define Kd 25
+#define Kd 3
 
 #define TARGET_NO 2
 #define TARGET_LEFT -1

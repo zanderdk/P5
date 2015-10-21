@@ -32,9 +32,9 @@
 
     	  S8 target = directionCheck(NXT_PORT_S1, NXT_PORT_S2);
     	  S32 speed = PIDTarget(target);
-    	  if(nxt_motor_get_count(NXT_PORT_A) > -90 && nxt_motor_get_count(NXT_PORT_A) < 90)
+    	  if(nxt_motor_get_count(NXT_PORT_A) > -75 && nxt_motor_get_count(NXT_PORT_A) < 75)
     		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
-    	  else if((speed > 0 && nxt_motor_get_count(NXT_PORT_A) < -90) || (speed < 0 && nxt_motor_get_count(NXT_PORT_A) > 90))
+    	  else if((speed > 0 && nxt_motor_get_count(NXT_PORT_A) < -75) || (speed < 0 && nxt_motor_get_count(NXT_PORT_A) > 75))
     	  {
     		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
     	  }
