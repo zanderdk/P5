@@ -88,12 +88,7 @@ S32 PIDTarget(S8 target)
 			noTarget = 0;
 			hadTarget = 0;
 		}
-		else
-		{
-			if(hadTarget != 0)
-				return hadTarget * 75;
 
-		}
-		return 0;
+		return hadTarget * 75;
 	}
 }
