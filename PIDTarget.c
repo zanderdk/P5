@@ -62,6 +62,7 @@ S32 PIDTarget(S8 target)
 	static S32 lastError = 0;
 	static S32 integrale = 0;
 	static S16 noTarget = 0;
+	static S8 hadTarget = 0;
 
 	if(target != TARGET_NO)
 	{
@@ -69,6 +70,8 @@ S32 PIDTarget(S8 target)
 		integrale += target;
 
 		double speed = target * Kp + integrale *Ki + derivative * Kd;
+		S32 intSpeed = (int)speed;
+		hadTarget = (intSpeed >> 31) | 1;
 
 		return (speed > 0) ?
 		            (S32)(speed + 50) :
@@ -78,11 +81,18 @@ S32 PIDTarget(S8 target)
 	}
 	else
 	{
-		if(noTarget++ == 200)
+		if(noTarget++ == 10 && hadTarget != 0)
 		{
 			lastError = 0;
 			integrale = 0;
 			noTarget = 0;
+			hadTarget = 0;
+		}
+		else
+		{
+			if(hadTarget != 0)
+				return hadTarget * 75;
+
 		}
 		return 0;
 	}
