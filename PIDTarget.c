@@ -66,6 +66,7 @@ S32 PIDTarget(S8 target)
 
 	if(target != TARGET_NO)
 	{
+		noTarget = 0;
 		S32 derivative = target - lastError;
 		integrale += target;
 
@@ -81,7 +82,7 @@ S32 PIDTarget(S8 target)
 	}
 	else
 	{
-		if(noTarget++ == 10 && hadTarget != 0)
+		if(noTarget++ == 200 && hadTarget != 0)
 		{
 			lastError = 0;
 			integrale = 0;
