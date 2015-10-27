@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int N = 3;
+typedef int[0, N] int_p;
+typedef int[0, N] int_id;
+urgent chan run[int_id];
+
+chan ready[int_id], release[int_id], stop, idl;
+
+typedef struct {
+    int_id id;
+    int_p P;
+    int T;
+    int C;
+} task;</declaration>
+	<template>
+		<name>Scheduler</name>
+		<parameter>const task inputTasks[N]</parameter>
+		<declaration>typedef int[0, N-1] int_t;
+task empty = {0,0,0,0};
+int_t len = N-1;
+
+int_id running = 0;
+
+task staticTasks[N] = inputTasks;
+task tasks[N] = inputTasks;
+
+task idToTask(int_id id) {
+    int_id i;
+    for(i = 0; i &lt; N; i++)
+    {
+        if(staticTasks[i].id == id)
+            return staticTasks[i];
+    }
+    return empty;
+}
+
+void enqueue(task t){
+int_t i = len-2;
+len++;
+tasks[len] = t;
+while(tasks[i].P &lt; tasks[i+1].P) {
+        task tmp = tasks[i];
+        tasks[i] = tasks[i+1];
+        tasks[i+1] = tmp;
+        i--;
+    }
+}
+
+task front(){
+    return tasks[0];
+}
+
+void dequeue()
+{
+int_t i;
+--len;
+for(i = 0; i &lt; len; i++) {
+        tasks[i] = tasks[i+1];
+    }
+tasks[i+1] = empty;
+}
+
+
+</declaration>
+		<location id="id0" x="153" y="187">
+		</location>
+		<location id="id1" x="-17" y="-76">
+		</location>
+		<location id="id2" x="-17" y="187">
+		</location>
+		<location id="id3" x="-17" y="51">
+			<name x="8" y="34">Occ</name>
+		</location>
+		<location id="id4" x="-17" y="-204">
+			<name x="-27" y="-238">Free</name>
+		</location>
+		<init ref="id4"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="161" y="85">run[front().id]!</label>
+			<label kind="assignment" x="161" y="102">running = front().id</label>
+			<nail x="153" y="51"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="1" y="170">stop!</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-229" y="119">running == front().id</label>
+			<nail x="-76" y="127"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="select" x="-8" y="76">id : int_id</label>
+			<label kind="synchronisation" x="-8" y="102">release[id]?</label>
+			<label kind="assignment" x="-8" y="127">enqueue(idToTask(id))</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-221" y="-93">idl?</label>
+			<label kind="assignment" x="-272" y="-68">dequeue()</label>
+			<nail x="-195" y="51"/>
+			<nail x="-195" y="-204"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="guard" x="204" y="-127">len &gt; 0</label>
+			<label kind="synchronisation" x="204" y="-110">run[front().id]!</label>
+			<label kind="assignment" x="1" y="-204">running = front().id</label>
+			<nail x="195" y="-204"/>
+			<nail x="195" y="51"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-8" y="-34">run[front().id]!</label>
+			<label kind="assignment" x="-8" y="-8">running = front().id</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="select" x="-8" y="-170">id : int_id</label>
+			<label kind="synchronisation" x="-8" y="-153">release[id]?</label>
+			<label kind="assignment" x="-8" y="-136">enqueue(idToTask(id))</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Task</name>
+		<parameter>task properties</parameter>
+		<declaration>// Place local declarations here.
+clock t, c;
+int blocked = 0;
+double time = 0.0;
+
+</declaration>
+		<location id="id5" x="0" y="110">
+			<name x="-93" y="93">Running</name>
+			<label kind="invariant" x="-59" y="136">t &lt;= properties.T</label>
+		</location>
+		<location id="id6" x="204" y="110">
+			<name x="185" y="68">Error</name>
+		</location>
+		<location id="id7" x="0" y="-17">
+			<name x="17" y="-17">Ready</name>
+			<label kind="invariant" x="-136" y="-25">t &lt;= properties.T</label>
+		</location>
+		<location id="id8" x="0" y="-144">
+			<name x="-10" y="-178">Idle</name>
+			<label kind="invariant" x="17" y="-153">t &lt;= properties.T</label>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id7"/>
+			<label kind="synchronisation" x="-76" y="42">stop?</label>
+			<label kind="assignment" x="-85" y="59">time = c</label>
+			<nail x="-25" y="51"/>
+			<nail x="-25" y="51"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-323" y="0">c == properties.C &amp;&amp;
+t &lt;= properties.T</label>
+			<label kind="synchronisation" x="-221" y="-25">idl!</label>
+			<nail x="-161" y="110"/>
+			<nail x="-161" y="-144"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="guard" x="221" y="-25">t == properties.T</label>
+			<nail x="204" y="-17"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="guard" x="68" y="119">t &gt; properties.T</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="8" y="42">run[properties.id]?</label>
+			<label kind="assignment" x="8" y="59">c = time</label>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="guard" x="8" y="-102">t == properties.T</label>
+			<label kind="synchronisation" x="8" y="-85">release[properties.id]!</label>
+			<label kind="assignment" x="8" y="-68">t = 0, time = 0</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+const task t1 = { 1, 1, 5, 1 };
+const task t2 = { 2, 2, 25, 3 };
+const task t3 = { 3, 3, 50, 5 };
+task1 = Task(t1);
+task2 = Task(t2);
+task3 = Task(t3);
+
+const task tasks[N] = {t1, t2, t3};
+s = Scheduler(tasks);
+
+// List one or more processes to be composed into a system.
+system task1, task2, task3, s;
+ </system>
+	<queries>
+	</queries>
+</nta>
