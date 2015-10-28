@@ -4,8 +4,7 @@
 S32 shotsfired = 0;
 
 void cock(U8 motor1, U8 motor2){
-
-	S32 cAngle = shotsfired * 300 + 150;
+	S32 cAngle = shotsfired * 300 + 227;
 
 
 	MotorPID(cAngle,motor1);
@@ -14,7 +13,7 @@ void cock(U8 motor1, U8 motor2){
 
 S32 fire(U8 motor1, U8 motor2){
 
-	S32 fAngle = shotsfired * 300 + 300;
+	S32 fAngle = shotsfired * 300 + 325;
 
 	MotorPID(fAngle,motor1);
 	MotorPID(fAngle,motor2);
