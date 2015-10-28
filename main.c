@@ -5,6 +5,7 @@
 #include "ecrobot_interface.h"
 #include "math.h"
 #include "dist_nx.h"
+#include "dist_nx_v3.h"
 #include "PIDTarget.h"
 
 #define ANGLE 60

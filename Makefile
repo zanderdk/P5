@@ -5,7 +5,8 @@ TARGET_SOURCES = \
 	main.c \
 	PID.c \
 	weapon_system.c \
-	PIDTarget.c
+	PIDTarget.c \
+	dist_nx_v3.c 
 	
 TOPPERS_OSEK_OIL_SOURCE = ./main.oil
 
