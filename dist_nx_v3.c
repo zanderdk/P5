@@ -29,7 +29,7 @@ S32 ecrobot_get_dist_v3_sensor(U8 port_id)
         return -1;
     
     distance[port_id] = (S32)((data[port_id][1] << 8) | data[port_id][0]);
-    ecrobot_read_i2c(port_id, 0x03, 0x42, data[port_id], 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x44, data[port_id], 2);
 
     return distance[port_id];
 }
