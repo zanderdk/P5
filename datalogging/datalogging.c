@@ -24,16 +24,15 @@ void bt_data_logger(void);
 void ecrobot_device_initialize()
 {
   ecrobot_init_bt_slave("1234");
-  ecrobot_init_sonar_sensor(NXT_PORT_S1);
-  ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM);
+  ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
+  ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM, 0);
   nxt_motor_set_speed(NXT_PORT_A, 0, 1);
 }
 
 void ecrobot_device_terminate()
 {
   ecrobot_term_bt_connection();
-  ecrobot_term_sonar_sensor(NXT_PORT_S1);
-  /* ecrobot_term_sonar_sensor(NXT_PORT_S2); */
+  ecrobot_term_dist_sensor(NXT_PORT_S1);
   ecrobot_term_dist_sensor(NXT_PORT_S2);
   nxt_motor_set_speed(NXT_PORT_A, 0, 1);
 }
@@ -78,7 +77,14 @@ U8 directionCheck(S32 sensorLeft, S32 sensorRight){
 TASK(Task1)
 {
   bt_data_logger();
-
+/*
+  if(nxt_motor_get_count(NXT_PORT_A) > 75)
+	  nxt_motor_set_speed(NXT_PORT_A, -50, 0);
+  else if(nxt_motor_get_count(NXT_PORT_A) < -75)
+  {
+	  nxt_motor_set_speed(NXT_PORT_A, 50, 1);
+  }
+*/
   /* display Sensors/Motors/NXT internal status */
   ecrobot_status_monitor("Data Logging");
   TerminateTask();
@@ -87,45 +93,15 @@ TASK(Task1)
 /* Task2 executed every 2000msec */
 TASK(Task2)
 {
-  /* display_clear(1); */
-
-      /* S32 sensor1 = ecrobot_get_sonar_sensor(NXT_PORT_S1); */
-      /* S32 sensor2 = ecrobot_get_sonar_sensor(NXT_PORT_S2); */
-
-      /* U8 direction = directionCheck(sensor1, sensor2); */
-
-
-      /* if(direction == TARGET_NO) */
-          sweep();
-      /* else if(direction == TARGET_LEFT && nxt_motor_get_count(NXT_PORT_A) > 0) */
-      /*     ecrobot_set_motor_speed(NXT_PORT_A,-80); */
-      /* else if(direction == TARGET_RIGHT && nxt_motor_get_count(NXT_PORT_A) < 90) */
-      /*     ecrobot_set_motor_speed(NXT_PORT_A,80); */
-      /* else */
-      /*     ecrobot_set_motor_mode_speed(NXT_PORT_A,1,0); */
-
-
-      /* display_goto_xy(0, 0); */
-      /* display_int(sensor1,3); */
-      /*  */
-      /* display_goto_xy(0,1); */
-      /* display_int(sensor2,3); */
-      /*  */
-      /* display_goto_xy(0,2); */
-      /* display_int(direction, 1); */
-      /*  */
-   	  /* display_update(); */
-
-
-
+      //sweep();
       TerminateTask();
 }
 
 void bt_data_logger(void)
 {
 	static U8 data_log_buffer[16];
-    S32 sensor1 = ecrobot_get_sonar_sensor(NXT_PORT_S1);
-    S32 sensor2 = ecrobot_get_dist_sensor(NXT_PORT_S2)/10;
+    S32 sensor1 = ecrobot_get_dist_sensor(NXT_PORT_S1);
+    S32 sensor2 = ecrobot_get_dist_sensor(NXT_PORT_S2);
 
 
 	*((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
