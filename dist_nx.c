@@ -14,6 +14,21 @@ double func(long double x, long double a, long double b){
     return a/(pow(x, b));
 }
 
+double calc2(long double x) {
+    if(x > 1190.06)
+        return func(x, 754786, 1.149511567103518); 
+    if(x > 719.485) 
+        return func(x, 268880, 1.005682319606504); 
+    if(x > 523.607)
+        return func(x, 387698, 1.062713472070904); 
+    if(x > 415.071)
+        return func(x, 1150110, 1.241419799586523);
+    
+    long double val = func(x, 601546, 1.137208843419663);
+    return (val > 800)? 800 : val;
+}
+
+
 double calc(long double x) {
     if(x > 1193.3)
         return func(x, 775273, 1.152850108742073); 
@@ -73,10 +88,13 @@ double ecrobot_get_dist_sensor(U8 port_id)
     
     dist[port_id] = (double)((data[port_id][1] << 8) | data[port_id][0]);
 
+    if(!sen[port_id])
+        dist[port_id] = calc2(dist[port_id]);
+
     if(sen[port_id])
         dist[port_id] = calc(dist[port_id]);
 
-    ecrobot_read_i2c(port_id, 0x03, 0x42 + sen[port_id]*2 , data[port_id], 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x44 , data[port_id], 2);
 
     return dist[port_id];
 }
