@@ -40,7 +40,7 @@ double calc(long double x) {
         return func(x, 1236340000000000000, 5.442282287396021);
     
     long double val = func(x, 10000700000000, 3.632572817825240);
-    return (val > 900)? 900 : val;
+    return (val > 800)? 800 : val;
 }
 
 void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range)
