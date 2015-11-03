@@ -19,7 +19,7 @@
 #define MOTOR_STOP  0
 
 S8 position_check(U8 left_sensor, U8 right_sensor){
-	static S8 prev = 0;
+	static S8 prev = TARGET_UNKNOWN;
 	S32 left = (S32)ecrobot_get_dist_sensor(left_sensor);
 	S32 right = (S32)ecrobot_get_dist_sensor(right_sensor);
 
@@ -27,21 +27,15 @@ S8 position_check(U8 left_sensor, U8 right_sensor){
 		return prev = TARGET_CENTER;
 	if(left < RANGE_FAR)
 		return prev = TARGET_MED_LEFT;
-	if(left < RANGE_CLOSE){
-		if(prev == TARGET_UNKNOWN)
-			return prev = TARGET_FAR_LEFT;
+	if(left < RANGE_CLOSE)
 		return prev = TARGET_LEFT;
-	}
 	if(right < RANGE_FAR)
 		return prev = TARGET_MED_RIGHT;
-	if(right < RANGE_CLOSE){
-		if(prev == TARGET_UNKNOWN)
-			return prev = TARGET_FAR_RIGHT;
+	if(right < RANGE_CLOSE)
 		return prev = TARGET_RIGHT;
-	}
 	if(prev < 0)
 		return prev = TARGET_FAR_LEFT;
-	if(prev > 0)
+	if(prev > 0 && prev != TARGET_UNKNOWN)
 		return prev = TARGET_FAR_RIGHT;
 	else return prev =TARGET_UNKNOWN;
 }
