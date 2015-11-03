@@ -15,16 +15,12 @@ double func(long double x, long double a, long double b){
 }
 
 double calc2(long double x) {
-    if(x > 1190.06)
-        return func(x, 754786, 1.149511567103518); 
-    if(x > 719.485) 
-        return func(x, 268880, 1.005682319606504); 
-    if(x > 523.607)
-        return func(x, 387698, 1.062713472070904); 
-    if(x > 415.071)
-        return func(x, 1150110, 1.241419799586523);
+    if(x > 1226.87)
+        return func(x, 581127.6081355726, 1.1078247500891030605522820291876226945); 
+    if(x > 835.973) 
+        return func(x, 1656333.5741040043, 1.25345796169767853357774826542185982966); 
     
-    long double val = func(x, 601546, 1.137208843419663);
+    long double val = func(x, 382502193234270160000000, 7.1927674628603778680252272435543044909);
     return (val > 800)? 800 : val;
 }
 
