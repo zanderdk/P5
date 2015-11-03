@@ -182,15 +182,15 @@ task tail()
 {
    return list[len - 1];
 }</declaration>
-		<location id="id4" x="195" y="221">
+		<location id="id4" x="187" y="221">
 		</location>
-		<location id="id5" x="-110" y="187">
-			<name x="-93" y="144">SwitchingFree</name>
-			<label kind="invariant" x="-255" y="178">t &lt;= getSwitch()</label>
+		<location id="id5" x="-280" y="221">
+			<name x="-272" y="178">SwitchingFree</name>
+			<label kind="invariant" x="-272" y="195">t &lt;= getSwitch()</label>
 		</location>
-		<location id="id6" x="68" y="586">
-			<name x="51" y="629">SwitchingRunning</name>
-			<label kind="invariant" x="58" y="603">t &lt;= getSwitch()</label>
+		<location id="id6" x="187" y="671">
+			<name x="127" y="714">SwitchingRunning</name>
+			<label kind="invariant" x="127" y="731">t &lt;= getSwitch()</label>
 		</location>
 		<location id="id7" x="331" y="450">
 			<committed/>
@@ -198,8 +198,8 @@ task tail()
 		<location id="id8" x="59" y="450">
 			<committed/>
 		</location>
-		<location id="id9" x="192" y="320">
-			<name x="208" y="320">Occ</name>
+		<location id="id9" x="187" y="323">
+			<name x="204" y="297">Occ</name>
 		</location>
 		<location id="id10" x="192" y="128">
 			<name x="255" y="93">Free</name>
@@ -208,23 +208,22 @@ task tail()
 		<transition>
 			<source ref="id6"/>
 			<target ref="id6"/>
-			<label kind="select" x="102" y="671">e : int_id</label>
-			<label kind="guard" x="42" y="688">idToTask(e).P &lt;= front().P</label>
-			<label kind="synchronisation" x="102" y="705">ready[e]?</label>
-			<label kind="assignment" x="59" y="722">enqueue(idToTask(e))</label>
-			<nail x="0" y="671"/>
-			<nail x="246" y="663"/>
-			<nail x="178" y="586"/>
+			<label kind="select" x="332" y="637">e : int_id</label>
+			<label kind="guard" x="272" y="654">idToTask(e).P &lt;= front().P</label>
+			<label kind="synchronisation" x="332" y="671">ready[e]?</label>
+			<label kind="assignment" x="289" y="688">enqueue(idToTask(e))</label>
+			<nail x="264" y="612"/>
+			<nail x="263" y="722"/>
 		</transition>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id5"/>
-			<label kind="select" x="-187" y="-59">e : int_id</label>
-			<label kind="guard" x="-187" y="-42">idToTask(e).P &lt;= front().P</label>
-			<label kind="synchronisation" x="-187" y="-25">ready[e]?</label>
-			<label kind="assignment" x="-195" y="-8">enqueue(idToTask(e))</label>
-			<nail x="-52" y="17"/>
-			<nail x="-205" y="17"/>
+			<label kind="select" x="-477" y="52">e : int_id</label>
+			<label kind="guard" x="-477" y="69">idToTask(e).P &lt;= front().P</label>
+			<label kind="synchronisation" x="-477" y="86">ready[e]?</label>
+			<label kind="assignment" x="-476" y="102">enqueue(idToTask(e))</label>
+			<nail x="-289" y="127"/>
+			<nail x="-382" y="212"/>
 		</transition>
 		<transition>
 			<source ref="id4"/>
@@ -241,13 +240,13 @@ task tail()
 		<transition>
 			<source ref="id5"/>
 			<target ref="id5"/>
-			<label kind="select" x="-493" y="144">e : int_id</label>
-			<label kind="guard" x="-493" y="161">idToTask(e).P &gt; front().P</label>
-			<label kind="synchronisation" x="-493" y="178">ready[e]?</label>
-			<label kind="assignment" x="-493" y="195">enqueue(idToTask(e)),
+			<label kind="select" x="-501" y="263">e : int_id</label>
+			<label kind="guard" x="-501" y="280">idToTask(e).P &gt; front().P</label>
+			<label kind="synchronisation" x="-501" y="297">ready[e]?</label>
+			<label kind="assignment" x="-501" y="314">enqueue(idToTask(e)),
  incSwichLen()</label>
-			<nail x="-332" y="85"/>
-			<nail x="-332" y="280"/>
+			<nail x="-289" y="323"/>
+			<nail x="-382" y="229"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
@@ -256,37 +255,39 @@ task tail()
 			<label kind="guard" x="-178" y="255">e == front().id &amp;&amp; len - 1 &gt; 0</label>
 			<label kind="synchronisation" x="-178" y="272">release[e]?</label>
 			<label kind="assignment" x="-178" y="289">dequeue(), t = 0</label>
+			<nail x="-280" y="323"/>
 		</transition>
 		<transition>
 			<source ref="id10"/>
 			<target ref="id5"/>
-			<label kind="select" x="-51" y="76">e : int_id</label>
-			<label kind="synchronisation" x="-51" y="102">ready[e]?</label>
-			<label kind="assignment" x="-51" y="119">enqueue(idToTask(e)), t = 0</label>
+			<label kind="select" x="-238" y="33">e : int_id</label>
+			<label kind="synchronisation" x="-238" y="59">ready[e]?</label>
+			<label kind="assignment" x="-238" y="76">enqueue(idToTask(e)), t = 0</label>
+			<nail x="-280" y="127"/>
 		</transition>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id6"/>
-			<label kind="select" x="-68" y="552">e : int_id</label>
-			<label kind="guard" x="-178" y="569">idToTask(e).P &gt; front().P</label>
-			<label kind="synchronisation" x="-68" y="586">ready[e]?</label>
-			<label kind="assignment" x="-161" y="612">enqueue(idToTask(e)),
+			<label kind="select" x="51" y="637">e : int_id</label>
+			<label kind="guard" x="-59" y="654">idToTask(e).P &gt; front().P</label>
+			<label kind="synchronisation" x="51" y="671">ready[e]?</label>
+			<label kind="assignment" x="-42" y="697">enqueue(idToTask(e)),
 incSwichLen()</label>
-			<nail x="0" y="518"/>
-			<nail x="0" y="637"/>
+			<nail x="119" y="603"/>
+			<nail x="119" y="722"/>
 		</transition>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id7"/>
-			<label kind="guard" x="178" y="527">t == getSwitch()</label>
-			<label kind="assignment" x="178" y="544">resetSwitch()</label>
+			<label kind="guard" x="280" y="535">t == getSwitch()</label>
+			<label kind="assignment" x="255" y="561">resetSwitch()</label>
 		</transition>
 		<transition>
 			<source ref="id8"/>
 			<target ref="id6"/>
-			<label kind="guard" x="68" y="484">running != front().id</label>
-			<label kind="synchronisation" x="76" y="501">stop!</label>
-			<label kind="assignment" x="76" y="518">t = 0</label>
+			<label kind="guard" x="-51" y="518">running != front().id</label>
+			<label kind="synchronisation" x="-43" y="535">stop!</label>
+			<label kind="assignment" x="-43" y="552">t = 0</label>
 		</transition>
 		<transition>
 			<source ref="id7"/>
