@@ -65,19 +65,4 @@ S8 naive_speed(S8 reading){
 		default:
 			return MOTOR_STOP;
 	}
-	
-	/*
-	S8 sign = 0; //((U8)reading) >> 7;
-
-	if(reading > 0)
-		sign = -1;
-	else sign = 1;
-
-
-	
-	S8 speed = reading * 20 + 40 * sign;
-
-	// (40 * !!reading) * sign + (reading * 20) * sign;
-	return (speed == 120) ? 0 : speed;
-	*/
 }
