@@ -7,6 +7,7 @@
 #include "dist_nx.h"
 #include "dist_nx_v3.h"
 #include "PIDTarget.h"
+#include "tracking.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
