@@ -7,60 +7,164 @@
 #include "dist_nx.h"
 #include "dist_nx_v3.h"
 #include "PIDTarget.h"
-#include "tracking.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
 
+#define TARGET_NOT_LEFT -4
+#define TARGET_FAR_LEFT -3
+#define TARGET_MED_LEFT -2
+#define TARGET_LEFT     -1
+#define TARGET_CENTER    0
+#define TARGET_RIGHT     1
+#define TARGET_MED_RIGHT 2
+#define TARGET_FAR_RIGHT 3
+#define TARGET_NOT_RIGHT 4
+#define TARGET_UNKNOWN   5
+
+#define RANGE_FAR 300
+#define RANGE_CLOSE 700
+
+#define MOTOR_FAST 80
+#define MOTOR_MED  75
+#define MOTOR_SLOW 70
+#define MOTOR_STOP  0
+
+#define LEFT_SENSOR NXT_PORT_S1
+#define RIGHT_SENSOR NXT_PORT_S2
+
+DeclareCounter(SysTimerCnt);
+DeclareTask(Task1);
+DeclareTask(Task2);
+
+S8 kalmanReading = 0;
+S8 speed = 0;
+
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
-    void user_1ms_isr_type2(void){ /* do nothing */ }
+    void user_1ms_isr_type2(void)
+    {
+      StatusType ercd;
+
+      ercd = SignalCounter(SysTimerCnt); /* Increment OSEK Alarm Counter */
+      if (ercd != E_OK)
+      {
+        ShutdownOS(ercd);
+      }
+    }
 
     void ecrobot_device_initialize(void)
     {
+    	//ecrobot_init_bt_slave("1234");
         ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
         ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM, 0);
+        //ecrobot_init_dist_v3_sensor(NXT_PORT_S3);
     }
     
     void ecrobot_device_terminate(void)
     {
+    	//ecrobot_term_bt_connection();
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
     	ecrobot_term_dist_sensor(NXT_PORT_S2);
+    	//ecrobot_term_dist_v3_sensor(NXT_PORT_S3);
+
     }
 
-    TASK(OSEK_Task_Background)
+
+    S8 naive_speed(S8 reading){
+    switch(reading){
+        case TARGET_FAR_LEFT:
+            return -MOTOR_FAST;
+        case TARGET_MED_LEFT:
+            return -MOTOR_MED;
+        case TARGET_LEFT:
+            return -MOTOR_SLOW;
+        case TARGET_CENTER:
+            return MOTOR_STOP;
+        case TARGET_RIGHT:
+            return MOTOR_SLOW;
+        case TARGET_MED_RIGHT:
+            return MOTOR_MED;
+        case TARGET_FAR_RIGHT:
+            return MOTOR_FAST;
+        default:
+            return MOTOR_STOP;
+    }
+    }
+
+    TASK(Task2)
+    {   
+        static S8 prev = TARGET_UNKNOWN;
+        S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
+        S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
+
+        if(left < RANGE_CLOSE && right < RANGE_CLOSE)
+            prev = TARGET_CENTER;
+        else if(left < RANGE_FAR)
+            prev = TARGET_MED_LEFT;
+        else if(left < RANGE_CLOSE){
+            if(prev == TARGET_UNKNOWN || prev == TARGET_NOT_LEFT || prev == TARGET_FAR_LEFT)
+                prev = TARGET_FAR_LEFT;
+            else prev = TARGET_LEFT;
+        }
+        else if(right < RANGE_FAR)
+            prev = TARGET_MED_RIGHT;
+        else if(right < RANGE_CLOSE){
+            if(prev == TARGET_UNKNOWN || prev == TARGET_NOT_RIGHT || prev == TARGET_FAR_RIGHT)
+                prev = TARGET_FAR_RIGHT;
+            else prev = TARGET_RIGHT;
+        }
+        else if(prev < 0)
+            prev = TARGET_NOT_LEFT;
+        else if(prev > 0 && prev != TARGET_UNKNOWN)
+            prev = TARGET_NOT_RIGHT;
+        else prev = TARGET_UNKNOWN;
+
+        if(prev == TARGET_FAR_LEFT)
+            kalmanReading = TARGET_MED_LEFT;
+        else if(prev == TARGET_FAR_RIGHT)
+            kalmanReading = TARGET_MED_RIGHT;
+        else kalmanReading = prev;
+
+        display_clear(1);
+
+        display_goto_xy(0, 0);
+        display_string("Kalman reading:");
+        display_goto_xy(1, 1);
+        display_int(kalmanReading, 5);
+
+        display_goto_xy(0, 2);
+        display_string("Prev:");
+        display_goto_xy(1, 3);
+        display_int(prev, 5);
+
+
+        systick_wait_ms(15);
+       
+        TerminateTask();
+    }
+
+    TASK(Task1)
     {
       while(1){
+        /*
+          S8 speed = naive_speed(kalmanReading);
+          S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 
-    	  S8 target = directionCheck(NXT_PORT_S1, NXT_PORT_S2);
-    	  S32 speed = PIDTarget(target);
-    	  if(nxt_motor_get_count(NXT_PORT_A) > -75 && nxt_motor_get_count(NXT_PORT_A) < 75)
-    		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
-    	  else if((speed > 0 && nxt_motor_get_count(NXT_PORT_A) < -75) || (speed < 0 && nxt_motor_get_count(NXT_PORT_A) > 75))
-    	  {
-    		  nxt_motor_set_speed(NXT_PORT_A, speed, 0);
-    	  }
-    	  else
-    	  {
-    		  nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-    	  }
+          if(( speed > 0 && motor_pos <= 50) || ( speed < 0 && motor_pos >= -50)){
+            nxt_motor_set_speed(NXT_PORT_A, speed, 0);
+            if(speed == 0)
+                nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+            }
+          else
+            nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+        */
 
-          display_clear(1);
-
-    	  display_goto_xy(0, 0);
-    	  display_int(speed,1);
-
-          display_goto_xy(0, 1);
-          //display_int(ecrobot_get_dist_sensor(NXT_PORT_S1), 5);
-
-          display_goto_xy(0, 2);
-          //display_int(ecrobot_get_dist_sensor(NXT_PORT_S2), 5);
-
-    	  display_update();
-
-    	  systick_wait_ms(10);
+    	  systick_wait_ms(15);
       }
     }
+
+	
 
 
 

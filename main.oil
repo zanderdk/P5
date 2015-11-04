@@ -18,8 +18,18 @@
       /* Definition of application mode */
       APPMODE appmode1{};
 
+      /* Definition of Task2 */
+      TASK Task2
+      {
+        AUTOSTART = FALSE;
+        PRIORITY = 2; /* Smaller value means lower priority */
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512; /* Stack size */
+      };
+
       /* Definition of OSEK_Task_Background */
-      TASK OSEK_Task_Background
+      TASK Task1
       {
         AUTOSTART = TRUE
         {
@@ -30,4 +40,27 @@
         SCHEDULE = FULL;
         STACKSIZE = 512;
       };
+
+  COUNTER SysTimerCnt
+  {
+    MINCYCLE = 1;
+    MAXALLOWEDVALUE = 10000;
+    TICKSPERBASE = 1; /* One tick is equal to 1msec */
+  };
+
+  /* Definition of Task1 execution timing */
+  ALARM cyclic_alarm1
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+      TASK = Task2;
     };
+    AUTOSTART = TRUE
+    {
+      ALARMTIME = 1;
+      CYCLETIME = 300; /* Task2 is executed every  x msec */
+      APPMODE = appmode1;
+    };
+  };
+};
