@@ -1,10 +1,3 @@
-/*
- * MatrixAlgebra.c
- *
- *  Created on: Nov 5, 2015
- *      Author: Kenneth
- */
-
 #include "ecrobot_types.h"
 
 void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
