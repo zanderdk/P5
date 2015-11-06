@@ -95,16 +95,19 @@ void matrixTranspose(S32 row, S32 columns, double matrix[row][columns], double r
 }
 
 
-S8 matrixInvers(S32 row, S32 columns, double matrix[columns][row], double rtnmatrix[columns][row])
+S8 matrixInvers(S32 row, S32 columns, double matrix[columns][row], double rtnMatrix[columns][row])
 {
 	double matrixTmp[columns][row];
 	matrixCopy(columns, row, matrixTmp, matrix);
 	if(row == 2 && columns == 2)
 	{
-		rtnmatrix[0][0] = matrixTmp[1][1];
-		rtnmatrix[0][1] = -matrixTmp[0][1];
-		rtnmatrix[1][0] = -matrixTmp[1][0];
-		rtnmatrix[1][1] = matrixTmp[0][0];
+		rtnMatrix[0][0] = matrixTmp[1][1];
+		rtnMatrix[0][1] = -matrixTmp[0][1];
+		rtnMatrix[1][0] = -matrixTmp[1][0];
+		rtnMatrix[1][1] = matrixTmp[0][0];
+		
+		double determinant = 1/(matrixTmp[0][0]*matrixTmp[1][1]-matrixTmp[0][1]*matrixTmp[1][0]);
+		skalarMultiplikation(row, columns, rtnMatrix, determinant, rtnMatrix);
 		return 1;
 	}
 	else
