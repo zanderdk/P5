@@ -1,6 +1,6 @@
 #include "ecrobot_types.h"
 
-void MatrixCopy(S32 row, S32 columns, double rtnMatrix[row][columns], double Matrix[row][columns])
+void matrixCopy(S32 row, S32 columns, double rtnmatrix[row][columns], double matrix[row][columns])
 {
 	S32 i = 0;
 	S32 j = 0;
@@ -8,50 +8,50 @@ void MatrixCopy(S32 row, S32 columns, double rtnMatrix[row][columns], double Mat
 	{
 		for(j=0; j < columns; j++)
 		{
-			rtnMatrix[i][j] = Matrix[i][j];
+			rtnmatrix[i][j] = matrix[i][j];
 		}
 	}
 }
 
-void MatrixAddition(S32 row, S32 columns, double firstMatrix[row][columns], double secondMatrix[row][columns], double rtnMatrix[row][columns])
+void matrixAddition(S32 row, S32 columns, double firstmatrix[row][columns], double secondmatrix[row][columns], double rtnmatrix[row][columns])
 {
-	double firstMatrixTmp[row][columns];
-	double secondMatrixTmp[row][columns];
-	MatrixCopy(row, columns, firstMatrixTmp, firstMatrix);
-	MatrixCopy(row, columns, secondMatrixTmp, secondMatrix);
+	double firstmatrixTmp[row][columns];
+	double secondmatrixTmp[row][columns];
+	matrixCopy(row, columns, firstmatrixTmp, firstmatrix);
+	matrixCopy(row, columns, secondmatrixTmp, secondmatrix);
 	S32 i = 0;
 	S32 j = 0;
 	for(i=0; i<row; i++)
 	{
 		for(j=0; j<columns; j++)
 		{
-			rtnMatrix[i][j] = firstMatrixTmp[i][j] + secondMatrixTmp[i][j];
+			rtnmatrix[i][j] = firstmatrixTmp[i][j] + secondmatrixTmp[i][j];
 		}
 	}
 }
 
-void SkalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], S32 multiplier, double rtnMatrix[row][columns])
+void skalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], S32 multiplier, double rtnmatrix[row][columns])
 {
 		double matrixTmp[row][columns];
-		MatrixCopy(row, columns, matrixTmp, matrix);
+		matrixCopy(row, columns, matrixTmp, matrix);
 		S32 i = 0;
 		S32 j = 0;
 		for(i=0; i<row; i++)
 		{
 			for(j=0; j<columns; j++)
 			{
-				rtnMatrix[i][j] = matrixTmp[i][j] * multiplier;
+				rtnmatrix[i][j] = matrixTmp[i][j] * multiplier;
 			}
 		}
 
 }
 
-S8 MatrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double firstMatrix[rowFirst][columnsFirst], double secondMatrix[rowSecond][columnsSecond], double rtnMatrix[rowFirst][columnsSecond])
+S8 matrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double firstmatrix[rowFirst][columnsFirst], double secondmatrix[rowSecond][columnsSecond], double rtnmatrix[rowFirst][columnsSecond])
 {
-	double firstMatrixTmp[rowFirst][columnsFirst];
-	double secondMatrixTmp[rowSecond][columnsSecond];
-	MatrixCopy(rowFirst, columnsFirst, firstMatrixTmp, firstMatrix);
-	MatrixCopy(rowSecond, columnsSecond, secondMatrixTmp, secondMatrix);
+	double firstmatrixTmp[rowFirst][columnsFirst];
+	double secondmatrixTmp[rowSecond][columnsSecond];
+	matrixCopy(rowFirst, columnsFirst, firstmatrixTmp, firstmatrix);
+	matrixCopy(rowSecond, columnsSecond, secondmatrixTmp, secondmatrix);
 	double sum = 0;
 	S32 i = 0;
 	S32 j = 0;
@@ -64,9 +64,9 @@ S8 MatrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 colum
 			{
 				for(k=0; k<rowSecond; k++)
 				{
-					sum += firstMatrixTmp[i][k]*secondMatrixTmp[k][j];
+					sum += firstmatrixTmp[i][k]*secondmatrixTmp[k][j];
 				}
-				rtnMatrix[i][j] = sum;
+				rtnmatrix[i][j] = sum;
 				sum = 0;
 			}
 		}
@@ -79,32 +79,32 @@ S8 MatrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 colum
 
 }
 
-void MatrixTranspose(S32 row, S32 columns, double Matrix[row][columns], double rtnMatrix[row][columns])
+void matrixTranspose(S32 row, S32 columns, double matrix[row][columns], double rtnmatrix[row][columns])
 {
-	double MatrixTmp[row][columns];
-	MatrixCopy(row, columns, MatrixTmp, Matrix);
+	double matrixTmp[row][columns];
+	matrixCopy(row, columns, matrixTmp, matrix);
 	S32 i = 0;
 	S32 j = 0;
 	for(i=0; i<row; i++)
 	{
 		for(j=0; j<columns; j++)
 		{
-			rtnMatrix[j][i] = MatrixTmp[i][j];
+			rtnmatrix[j][i] = matrixTmp[i][j];
 		}
 	}
 }
 
 
-S8 MatrixInvers(S32 row, S32 columns, double Matrix[columns][row], double rtnMatrix[columns][row])
+S8 matrixInvers(S32 row, S32 columns, double matrix[columns][row], double rtnmatrix[columns][row])
 {
-	double MatrixTmp[columns][row];
-	MatrixCopy(columns, row, MatrixTmp, Matrix);
+	double matrixTmp[columns][row];
+	matrixCopy(columns, row, matrixTmp, matrix);
 	if(row == 2 && columns == 2)
 	{
-		rtnMatrix[0][0] = MatrixTmp[1][1];
-		rtnMatrix[0][1] = -MatrixTmp[1][0];
-		rtnMatrix[1][0] = -MatrixTmp[0][1];
-		rtnMatrix[1][1] = MatrixTmp[0][0];
+		rtnmatrix[0][0] = matrixTmp[1][1];
+		rtnmatrix[0][1] = -matrixTmp[0][1];
+		rtnmatrix[1][0] = -matrixTmp[1][0];
+		rtnmatrix[1][1] = matrixTmp[0][0];
 		return 1;
 	}
 	else
