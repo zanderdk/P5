@@ -106,17 +106,17 @@ S8 speed = 0;
 
         /* calc Kalman Gain */
 
-        MatrixMultiplikation(2,2,2,2, Pk, hT, kk);
+        matrixMultiplikation(2,2,2,2, Pk, hT, kk);
         double kktemp[2][2] = {{0,0}};
-        MatrixMultiplikation(2,2,2,2, h,Pk, kktemp);
-        MatrixMultiplikation(2,2,2,2, kktemp, hT, kktemp);
+        matrixMultiplikation(2,2,2,2, h,Pk, kktemp);
+        matrixMultiplikation(2,2,2,2, kktemp, hT, kktemp);
         p = (double *)&kktemp[0][0];
         for(i = 0; i < 4; i++)
             p[i] = p[i] + R;
-        MatrixInvers(2, 2, kktemp, kktemp);
+        matrixInvers(2, 2, kktemp, kktemp);
         print4(kktemp);
 
-        MatrixMultiplikation(2,2,2,2,kk,kktemp,kk);
+        matrixMultiplikation(2,2,2,2,kk,kktemp,kk);
 
 
 
