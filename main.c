@@ -11,16 +11,16 @@
 #define ANGLE 60
 #define SAMPLESIZE 3
 
-#define TARGET_NOT_LEFT -4
-#define TARGET_FAR_LEFT -3
-#define TARGET_MED_LEFT -2
-#define TARGET_LEFT     -1
-#define TARGET_CENTER    0
-#define TARGET_RIGHT     1
-#define TARGET_MED_RIGHT 2
-#define TARGET_FAR_RIGHT 3
-#define TARGET_NOT_RIGHT 4
-#define TARGET_UNKNOWN   5
+#define LEFT_4 -4
+#define LEFT_3 -3
+#define LEFT_2 -2
+#define LEFT_1 -1
+#define CENTER  0
+#define RIGHT_1 1
+#define RIGHT_2 2
+#define RIGHT_3 3
+#define RIGHT_4 4
+#define UNKNOWN 5
 
 #define RANGE_FAR 300
 #define RANGE_CLOSE 700
@@ -73,19 +73,19 @@ S8 speed = 0;
 
     S8 naive_speed(S8 reading){
     switch(reading){
-        case TARGET_FAR_LEFT:
+        case LEFT_3:
             return -MOTOR_FAST;
-        case TARGET_MED_LEFT:
+        case LEFT_2:
             return -MOTOR_MED;
-        case TARGET_LEFT:
+        case LEFT_1:
             return -MOTOR_SLOW;
-        case TARGET_CENTER:
+        case CENTER:
             return MOTOR_STOP;
-        case TARGET_RIGHT:
+        case RIGHT_1:
             return MOTOR_SLOW;
-        case TARGET_MED_RIGHT:
+        case RIGHT_2:
             return MOTOR_MED;
-        case TARGET_FAR_RIGHT:
+        case RIGHT_3:
             return MOTOR_FAST;
         default:
             return MOTOR_STOP;
@@ -94,36 +94,42 @@ S8 speed = 0;
 
     TASK(Task2)
     {   
-        static S8 prev = TARGET_UNKNOWN;
+        static S8 prev = UNKNOWN;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
         if(left < RANGE_CLOSE && right < RANGE_CLOSE)
-            prev = TARGET_CENTER;
+            prev = CENTER;
         else if(left < RANGE_FAR)
-            prev = TARGET_MED_LEFT;
+            prev = LEFT_2;
         else if(left < RANGE_CLOSE){
-            if(prev == TARGET_UNKNOWN || prev == TARGET_NOT_LEFT || prev == TARGET_FAR_LEFT)
-                prev = TARGET_FAR_LEFT;
-            else prev = TARGET_LEFT;
+            if(prev == UNKNOWN || prev == LEFT_4 || prev == LEFT_3)
+                prev = LEFT_3;
+            else prev = LEFT_1;
         }
         else if(right < RANGE_FAR)
-            prev = TARGET_MED_RIGHT;
+            prev = RIGHT_2;
         else if(right < RANGE_CLOSE){
-            if(prev == TARGET_UNKNOWN || prev == TARGET_NOT_RIGHT || prev == TARGET_FAR_RIGHT)
-                prev = TARGET_FAR_RIGHT;
-            else prev = TARGET_RIGHT;
+            if(prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
+                prev = RIGHT_3;
+            else prev = RIGHT_1;
         }
         else if(prev < 0)
-            prev = TARGET_NOT_LEFT;
-        else if(prev > 0 && prev != TARGET_UNKNOWN)
-            prev = TARGET_NOT_RIGHT;
-        else prev = TARGET_UNKNOWN;
+            prev = LEFT_4;
+        else if(prev > 0 && prev != UNKNOWN)
+            prev = RIGHT_4;
+        else prev = UNKNOWN;
 
-        if(prev == TARGET_FAR_LEFT)
-            kalmanReading = TARGET_MED_LEFT;
-        else if(prev == TARGET_FAR_RIGHT)
-            kalmanReading = TARGET_MED_RIGHT;
+        if(prev == LEFT_3)
+            kalmanReading = LEFT_2;
+        else if(prev == RIGHT_3)
+            kalmanReading = RIGHT_2;
+        else if(prev == LEFT_4)
+            kalmanReading = LEFT_3;
+        else if(prev == RIGHT_4)
+            kalmanReading = RIGHT_3;
+        else if(prev = UNKNOWN)
+            kalmanReading = 4;
         else kalmanReading = prev;
 
         display_clear(1);
