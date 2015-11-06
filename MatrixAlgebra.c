@@ -7,10 +7,24 @@
 
 #include "ecrobot_types.h"
 
+void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
+{
+	int i, j;
+	for(i; i < columns; i++)
+	{
+		for(j; j < row; j++)
+		{
+			rtnMatrix[i][j] = Matrix[columns][row];
+		}
+	}
+}
+
 void MatrixAddition(int columns, int row, double firstMatrix[columns][row], double secondMatrix[columns][row], double rtnMatrix[columns][row])
 {
-	double firstMatrixTmp[columns][row] = firstMatrix;
-	double secondMatrixTmp[columns][row] = secondMatrix;
+	double firstMatrixTmp[columns][row];
+	double secondMatrixTmp[columns][row];
+	MatrixCopy(columns, row, firstMatrixTmp, firstMatrix);
+	MatrixCopy(columns, row, secondMatrixTmp, secondMatrix);
 	int i;
 	int j;
 	for(i=0; i<columns; i++)
@@ -24,7 +38,8 @@ void MatrixAddition(int columns, int row, double firstMatrix[columns][row], doub
 
 void SkalarMultiplikation(int columns, int row, double matrix[columns][row], int multiplier, double rtnMatrix[columns][row])
 {
-		double matrixTmp[columns][row] = matrix;
+		double matrixTmp[columns][row];
+		MatrixCopy(columns, row, matrixTmp, matrix);
 		int i = 0;
 		int j = 0;
 		for(i=0; i<columns; i++)
@@ -39,8 +54,10 @@ void SkalarMultiplikation(int columns, int row, double matrix[columns][row], int
 
 S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int rowSecond, double firstMatrix[columnsFirst][rowFirst], double secondMatrix[columnsSecond][rowSecond], double rtnMatrix[columnsFirst][rowSecond])
 {
-	double firstMatrixTmp[columnsFirst][rowFirst] = firstMatrix;
-	double  double secondMatrixTmp[columnsSecond][rowSecond] = secondMatrix;
+	double firstMatrixTmp[columnsFirst][rowFirst];
+	double  double secondMatrixTmp[columnsSecond][rowSecond];
+	MatrixCopy(columnsFirst, rowFirst, firstMatrixTmp, firstMatrix);
+	MatrixCopy(columnsSecond, rowSecond, secondMatrixTmp, secondMatrix);
 	double sum = 0;
 	int i;
 	int j;
@@ -69,6 +86,7 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 void MatrixTranspose(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
 	double MatrixTmp[columns][row] = Matrix;
+	MatrixCopy(columns, row, MatrixTmp, Matrix);
 	int i = 0;
 	int j = 0;
 	for(i=0; i<columns; i++)
@@ -84,6 +102,7 @@ void MatrixTranspose(int columns, int row, double Matrix[columns][row], double r
 S8 MatrixInvers(int row, int columns, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
 	double MatrixTmp[columns][row] = Matrix;
+	MatrixCopy(columns, row, MatrixTmp, Matrix);
 	if(row == 2 && columns == 2)
 	{
 		rtnMatrix[0][0] = MatrixTmp[1][1];
