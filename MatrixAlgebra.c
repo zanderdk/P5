@@ -106,7 +106,7 @@ S8 matrixInvers(S32 row, S32 columns, double matrix[columns][row], double rtnMat
 		rtnMatrix[1][0] = -matrixTmp[1][0];
 		rtnMatrix[1][1] = matrixTmp[0][0];
 		
-		double determinant = 1/(matrixTmp[0][0]*matrixTmp[1][1]-matrixTmp[0][1]*matrixTmp[1][0]);
+		double determinant = 1.0/(matrixTmp[0][0]*matrixTmp[1][1]-matrixTmp[0][1]*matrixTmp[1][0]);
 		skalarMultiplikation(row, columns, rtnMatrix, determinant, rtnMatrix);
 		return 1;
 	}
