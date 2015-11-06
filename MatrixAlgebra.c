@@ -1,6 +1,6 @@
 #include "ecrobot_types.h"
 
-void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
+void MatrixCopy(int columns, int row, double rtnMatrix[columns][row], double Matrix[columns][row])
 {
 	int i = 0;
 	int j = 0;
@@ -8,7 +8,7 @@ void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMat
 	{
 		for(j=0; j < row; j++)
 		{
-			rtnMatrix[i][j] = Matrix[columns][row];
+			rtnMatrix[i][j] = Matrix[i][j];
 		}
 	}
 }
@@ -56,12 +56,13 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 	int i = 0;
 	int j = 0;
 	int k = 0;
-	if(columsFirst == rowSecond)
+	if(columnsFirst == rowSecond)
 	{
 		for(i=0; i<columnsFirst; i++)
 		{
 			for(j=0; j<rowSecond; j++)
 			{
+				sum = 0;
 				for(k=0; k<columnsSecond; k++)
 				{
 					sum += firstMatrixTmp[i][k]*secondMatrixTmp[k][j];
