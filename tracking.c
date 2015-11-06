@@ -1,6 +1,7 @@
 #include "ecrobot_types.h"
 #include "dist_nx.h"
 
+#define TARGET_NOT_LEFT -4
 #define TARGET_FAR_LEFT -3
 #define TARGET_MED_LEFT -2
 #define TARGET_LEFT     -1
@@ -8,7 +9,8 @@
 #define TARGET_RIGHT     1
 #define TARGET_MED_RIGHT 2
 #define TARGET_FAR_RIGHT 3
-#define TARGET_UNKNOWN   4
+#define TARGET_NOT_RIGHT 4
+#define TARGET_UNKNOWN   5
 
 #define RANGE_FAR 300
 #define RANGE_CLOSE 700
@@ -17,6 +19,7 @@
 #define MOTOR_MED  75
 #define MOTOR_SLOW 70
 #define MOTOR_STOP  0
+
 
 S8 position_check(U8 left_sensor, U8 right_sensor){
 	static S8 prev = TARGET_UNKNOWN;
@@ -27,17 +30,23 @@ S8 position_check(U8 left_sensor, U8 right_sensor){
 		return prev = TARGET_CENTER;
 	if(left < RANGE_FAR)
 		return prev = TARGET_MED_LEFT;
-	if(left < RANGE_CLOSE)
+	if(left < RANGE_CLOSE){
+		if(prev == TARGET_UNKNOWN)
+			return prev = TARGET_FAR_LEFT;
 		return prev = TARGET_LEFT;
+	}
 	if(right < RANGE_FAR)
 		return prev = TARGET_MED_RIGHT;
-	if(right < RANGE_CLOSE)
+	if(right < RANGE_CLOSE){
+		if(prev == TARGET_UNKNOWN)
+			return prev = TARGET_FAR_RIGHT;
 		return prev = TARGET_RIGHT;
+	}
 	if(prev < 0)
-		return prev = TARGET_FAR_LEFT;
+		return prev = TARGET_NOT_LEFT;
 	if(prev > 0 && prev != TARGET_UNKNOWN)
-		return prev = TARGET_FAR_RIGHT;
-	else return prev =TARGET_UNKNOWN;
+		return prev = TARGET_NOT_RIGHT;
+	else return prev = TARGET_UNKNOWN;
 }
 
 S8 naive_speed(S8 reading){
