@@ -73,6 +73,23 @@ S8 speed = 0;
 
     }
 
+    void print4(double kk[2][2])
+    {       
+        display_clear(1);
+        display_goto_xy(0,0);
+        display_string("matrix:");
+        display_goto_xy(0, 1);
+        display_int((U32)(1000*kk[0][0]), 4);
+        display_goto_xy(6, 1);
+        display_int((U32)(1000*kk[0][1]), 4);
+
+        display_goto_xy(1, 2);
+        display_int((U32)(1000*kk[1][0]), 4);
+        display_goto_xy(6, 2);
+        display_int((U32)(1000*kk[1][1]), 4);
+
+    }
+
     void kalman(double zk[1][2])
     {
         /* Kalman konstanter og */
@@ -82,7 +99,7 @@ S8 speed = 0;
         static double dt = 0.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
         static double Pk[2][2] = {{VK,0.0},{0.0,VK}};
-        double t = (dt == 0)? 0.0 : (double)systick_get_ms()-dt;
+        double t = (dt == 0)? 0.006 : (double)systick_get_ms()-dt;
         double h[2][2] = {{1,t},{0,1}};
         double hT[2][2] = {{1,0},{t,1}};
         double kk[2][2] = {{0,0}, {0,0}};
@@ -97,19 +114,11 @@ S8 speed = 0;
         for(i = 0; i < 4; i++)
             p[i] = p[i] + R;
         MatrixInvers(2, 2, kktemp, kktemp);
+        print4(kktemp);
+
         MatrixMultiplikation(2,2,2,2,kk,kktemp,kk);
-            
-        display_clear(1);
 
-        display_goto_xy(0, 0);
-        display_string("Kalman Gain[0][0]:");
-        display_goto_xy(1, 1);
-        display_int((U32)(100*kk[0][0]), 5);
 
-        display_goto_xy(0, 2);
-        display_string("Kalman Gain[1][1]:");
-        display_goto_xy(1, 3);
-        display_int((U32)(100*kk[1][1]), 5);
 
         
         dt = t;
