@@ -3,7 +3,6 @@
 #include "ecrobot_base.h"
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
-#include "math.h"
 #include "dist_nx.h"
 #include "dist_nx_v3.h"
 #include "PIDTarget.h"
@@ -74,7 +73,7 @@ S8 speed = 0;
 
     }
 
-    void kalman(double zk[2])
+    void kalman(double zk[1][2])
     {
         /* Kalman konstanter og */
 
@@ -100,6 +99,18 @@ S8 speed = 0;
         MatrixInvers(2, 2, kktemp, kktemp);
         MatrixMultiplikation(2,2,2,2,kk,kktemp,kk);
             
+        display_clear(1);
+
+        display_goto_xy(0, 0);
+        display_string("Kalman Gain[0][0]:");
+        display_goto_xy(1, 1);
+        display_int((U32)(100*kk[0][0]), 5);
+
+        display_goto_xy(0, 2);
+        display_string("Kalman Gain[1][1]:");
+        display_goto_xy(1, 3);
+        display_int((U32)(100*kk[1][1]), 5);
+
         
         dt = t;
     }
@@ -161,21 +172,21 @@ S8 speed = 0;
             kalmanReading = LEFT_3;
         else if(prev == RIGHT_4)
             kalmanReading = RIGHT_3;
-        else if(prev = UNKNOWN)
+        else if(prev == UNKNOWN)
             kalmanReading = 4;
         else kalmanReading = prev;
 
-        display_clear(1);
-
-        display_goto_xy(0, 0);
-        display_string("Kalman reading:");
-        display_goto_xy(1, 1);
-        display_int(kalmanReading, 5);
-
-        display_goto_xy(0, 2);
-        display_string("Prev:");
-        display_goto_xy(1, 3);
-        display_int(prev, 5);
+        /* display_clear(1); */
+        /*  */
+        /* display_goto_xy(0, 0); */
+        /* display_string("Kalman reading:"); */
+        /* display_goto_xy(1, 1); */
+        /* display_int(kalmanReading, 5); */
+        /*  */
+        /* display_goto_xy(0, 2); */
+        /* display_string("Prev:"); */
+        /* display_goto_xy(1, 3); */
+        /* display_int(prev, 5); */
 
 
         systick_wait_ms(15);
@@ -185,6 +196,10 @@ S8 speed = 0;
 
     TASK(Task1)
     {
+
+      double dummy[1][2] = {{1,1}};
+      kalman(dummy);
+
       while(1){
         /*
           S8 speed = naive_speed(kalmanReading);

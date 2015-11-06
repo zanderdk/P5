@@ -1,19 +1,12 @@
-/*
- * MatrixAlgebra.c
- *
- *  Created on: Nov 5, 2015
- *      Author: Kenneth
- */
-
 #include "ecrobot_types.h"
 
 void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
 	int i = 0;
 	int j = 0;
-	for(i; i < columns; i++)
+	for(i=0; i < columns; i++)
 	{
-		for(j; j < row; j++)
+		for(j=0; j < row; j++)
 		{
 			rtnMatrix[i][j] = Matrix[columns][row];
 		}
@@ -73,6 +66,7 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 				{
 					sum += firstMatrixTmp[i][k]*secondMatrixTmp[k][j];
 				}
+				rtnMatrix[i][j] = sum;
 			}
 		}
 	}
