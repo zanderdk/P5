@@ -70,6 +70,21 @@ S8 speed = 0;
 
     }
 
+    void kalman((double *) vk)
+    {
+        static double dt = 0.0;
+        static double R = 121.0;
+        static double vk = 11.0;
+        static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
+        static double Pk[2][2] = {{vk,0.0},{0.0,vk}};
+        double t = (dt == 0)? 0.0 : (double)systick_get_ms()-dt;
+        double h[2][2] = {{1,t},{0,1}};
+        
+
+
+
+        dt = t;
+    }
 
     S8 naive_speed(S8 reading){
     switch(reading){
