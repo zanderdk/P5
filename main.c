@@ -7,6 +7,7 @@
 #include "dist_nx.h"
 #include "dist_nx_v3.h"
 #include "PIDTarget.h"
+#include "MatrixAlgebra.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
@@ -79,10 +80,11 @@ S8 speed = 0;
         static double Pk[2][2] = {{vk,0.0},{0.0,vk}};
         double t = (dt == 0)? 0.0 : (double)systick_get_ms()-dt;
         double h[2][2] = {{1,t},{0,1}};
+        double hT[2][2] = {{1,0},{t,1}};
+        double kk = 
         
-
-
-
+        
+        
         dt = t;
     }
 
