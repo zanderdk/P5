@@ -55,7 +55,7 @@ void SkalarMultiplikation(int columns, int row, double matrix[columns][row], int
 S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int rowSecond, double firstMatrix[columnsFirst][rowFirst], double secondMatrix[columnsSecond][rowSecond], double rtnMatrix[columnsFirst][rowSecond])
 {
 	double firstMatrixTmp[columnsFirst][rowFirst];
-	double  double secondMatrixTmp[columnsSecond][rowSecond];
+	double secondMatrixTmp[columnsSecond][rowSecond];
 	MatrixCopy(columnsFirst, rowFirst, firstMatrixTmp, firstMatrix);
 	MatrixCopy(columnsSecond, rowSecond, secondMatrixTmp, secondMatrix);
 	double sum = 0;
@@ -85,7 +85,7 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 
 void MatrixTranspose(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
-	double MatrixTmp[columns][row] = Matrix;
+	double MatrixTmp[columns][row];
 	MatrixCopy(columns, row, MatrixTmp, Matrix);
 	int i = 0;
 	int j = 0;
@@ -101,7 +101,7 @@ void MatrixTranspose(int columns, int row, double Matrix[columns][row], double r
 
 S8 MatrixInvers(int row, int columns, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
-	double MatrixTmp[columns][row] = Matrix;
+	double MatrixTmp[columns][row];
 	MatrixCopy(columns, row, MatrixTmp, Matrix);
 	if(row == 2 && columns == 2)
 	{
