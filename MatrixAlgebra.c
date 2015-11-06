@@ -9,7 +9,8 @@
 
 void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
-	int i, j;
+	int i = 0;
+	int j = 0;
 	for(i; i < columns; i++)
 	{
 		for(j; j < row; j++)
@@ -25,8 +26,8 @@ void MatrixAddition(int columns, int row, double firstMatrix[columns][row], doub
 	double secondMatrixTmp[columns][row];
 	MatrixCopy(columns, row, firstMatrixTmp, firstMatrix);
 	MatrixCopy(columns, row, secondMatrixTmp, secondMatrix);
-	int i;
-	int j;
+	int i = 0;
+	int j = 0;
 	for(i=0; i<columns; i++)
 	{
 		for(j=0; j<row; j++)
@@ -59,9 +60,9 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 	MatrixCopy(columnsFirst, rowFirst, firstMatrixTmp, firstMatrix);
 	MatrixCopy(columnsSecond, rowSecond, secondMatrixTmp, secondMatrix);
 	double sum = 0;
-	int i;
-	int j;
-	int k;
+	int i = 0;
+	int j = 0;
+	int k = 0;
 	if(rowFirst == columnsSecond)
 	{
 		for(i=0; i<columnsFirst; i++)
