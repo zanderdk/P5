@@ -34,6 +34,9 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
+#define VK 11.0
+#define R 121.0
+
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
 DeclareTask(Task2);
@@ -71,19 +74,32 @@ S8 speed = 0;
 
     }
 
-    void kalman((double *) vk)
+    void kalman(double zk[2])
     {
+        /* Kalman konstanter og */
+
+        int i;
+        double *p;
         static double dt = 0.0;
-        static double R = 121.0;
-        static double vk = 11.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-        static double Pk[2][2] = {{vk,0.0},{0.0,vk}};
+        static double Pk[2][2] = {{VK,0.0},{0.0,VK}};
         double t = (dt == 0)? 0.0 : (double)systick_get_ms()-dt;
         double h[2][2] = {{1,t},{0,1}};
         double hT[2][2] = {{1,0},{t,1}};
-        double kk = 
-        
-        
+        double kk[2][2] = {{0,0}, {0,0}};
+
+        /* calc Kalman Gain */
+
+        MatrixMultiplikation(2,2,2,2, Pk, hT, kk);
+        double kktemp[2][2] = {{0,0}};
+        MatrixMultiplikation(2,2,2,2, h,Pk, kktemp);
+        MatrixMultiplikation(2,2,2,2, kktemp, hT, kktemp);
+        p = (double *)&kktemp[0][0];
+        for(i = 0; i < 4; i++)
+            p[i] = p[i] + R;
+        MatrixInvers(2, 2, kktemp, kktemp);
+        MatrixMultiplikation(2,2,2,2,kk,kktemp,kk);
+            
         
         dt = t;
     }
