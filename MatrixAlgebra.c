@@ -63,7 +63,7 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 	int i = 0;
 	int j = 0;
 	int k = 0;
-	if(rowFirst == columnsSecond)
+	if(columsFirst == rowSecond)
 	{
 		for(i=0; i<columnsFirst; i++)
 		{
