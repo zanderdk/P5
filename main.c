@@ -99,6 +99,18 @@ S8 speed = 0;
         MatrixInvers(2, 2, kktemp, kktemp);
         MatrixMultiplikation(2,2,2,2,kk,kktemp,kk);
             
+        display_clear(1);
+
+        display_goto_xy(0, 0);
+        display_string("Kalman Gain[0][0]:");
+        display_goto_xy(1, 1);
+        display_int((U32)(100*kk[0][0]), 5);
+
+        display_goto_xy(0, 2);
+        display_string("Kalman Gain[1][1]:");
+        display_goto_xy(1, 3);
+        display_int((U32)(100*kk[1][1]), 5);
+
         
         dt = t;
     }

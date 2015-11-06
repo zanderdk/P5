@@ -4,9 +4,9 @@ void MatrixCopy(int columns, int row, double Matrix[columns][row], double rtnMat
 {
 	int i = 0;
 	int j = 0;
-	for(i; i < columns; i++)
+	for(i=0; i < columns; i++)
 	{
-		for(j; j < row; j++)
+		for(j=0; j < row; j++)
 		{
 			rtnMatrix[i][j] = Matrix[columns][row];
 		}
