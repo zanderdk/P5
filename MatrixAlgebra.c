@@ -30,7 +30,7 @@ void matrixAddition(S32 row, S32 columns, double firstMatrix[row][columns], doub
 	}
 }
 
-void skalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], S32 multiplier, double rtnMatrix[row][columns])
+void skalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], double multiplier, double rtnMatrix[row][columns])
 {
 		double matrixTmp[row][columns];
 		matrixCopy(row, columns, matrixTmp, matrix);
@@ -107,6 +107,7 @@ S8 matrixInvers(S32 row, S32 columns, double matrix[columns][row], double rtnMat
 		rtnMatrix[1][1] = matrixTmp[0][0];
 		
 		double determinant = 1.0/(matrixTmp[0][0]*matrixTmp[1][1]-matrixTmp[0][1]*matrixTmp[1][0]);
+		if(determinant == 0) return 0;
 		skalarMultiplikation(row, columns, rtnMatrix, determinant, rtnMatrix);
 		return 1;
 	}

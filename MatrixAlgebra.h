@@ -7,9 +7,9 @@
 
 #include "ecrobot_types.h"
 
-void matrixCopy(int columns, int row, double [columns][row], double [columns][row]);
-void matrixAddition(int row, int coulom, double [coulom][row], double [coulom][row], double [coulom][row]);
-void skalarMultiplikation(int row, int coulom, double [coulom][row], int multiplier, double [coulom][row]);
-S8 matrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int rowSecond, double [columnsFirst][rowFirst], double [columnsSecond][rowSecond], double [columnsFirst][rowSecond]);
-void matrixTranspose(int columns, int row, double [columns][row], double [columns][row]);
-S8 matrixInvers(int row, int columns, double [columns][row], double [columns][row]);
+void matrixCopy(S32 row, S32 columns, double [row][columns], double [row][columns]);
+void matrixAddition(S32 row, S32 columns, double [row][columns], double [row][columns], double [row][columns]);
+void skalarMultiplikation(S32 row, S32 columns, double [row][columns], double , double [row][columns]);
+S8 matrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double [rowFirst][columnsFirst], double [rowSecond][columnsSecond], double [rowFirst][columnsSecond]);
+void matrixTranspose(S32 row, S32 columns, double [row][columns], double [row][columns]);
+S8 matrixInvers(S32 row, S32 columns, double [columns][row], double [columns][row]);
