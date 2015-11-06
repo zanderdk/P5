@@ -1,44 +1,44 @@
 #include "ecrobot_types.h"
 
-void MatrixCopy(int columns, int row, double rtnMatrix[columns][row], double Matrix[columns][row])
+void MatrixCopy(S32 row, S32 columns, double rtnMatrix[row][columns], double Matrix[row][columns])
 {
-	int i = 0;
-	int j = 0;
-	for(i=0; i < columns; i++)
+	S32 i = 0;
+	S32 j = 0;
+	for(i=0; i < row; i++)
 	{
-		for(j=0; j < row; j++)
+		for(j=0; j < columns; j++)
 		{
 			rtnMatrix[i][j] = Matrix[i][j];
 		}
 	}
 }
 
-void MatrixAddition(int columns, int row, double firstMatrix[columns][row], double secondMatrix[columns][row], double rtnMatrix[columns][row])
+void MatrixAddition(S32 row, S32 columns, double firstMatrix[row][columns], double secondMatrix[row][columns], double rtnMatrix[row][columns])
 {
-	double firstMatrixTmp[columns][row];
-	double secondMatrixTmp[columns][row];
-	MatrixCopy(columns, row, firstMatrixTmp, firstMatrix);
-	MatrixCopy(columns, row, secondMatrixTmp, secondMatrix);
-	int i = 0;
-	int j = 0;
-	for(i=0; i<columns; i++)
+	double firstMatrixTmp[row][columns];
+	double secondMatrixTmp[row][columns];
+	MatrixCopy(row, columns, firstMatrixTmp, firstMatrix);
+	MatrixCopy(row, columns, secondMatrixTmp, secondMatrix);
+	S32 i = 0;
+	S32 j = 0;
+	for(i=0; i<row; i++)
 	{
-		for(j=0; j<row; j++)
+		for(j=0; j<columns; j++)
 		{
 			rtnMatrix[i][j] = firstMatrixTmp[i][j] + secondMatrixTmp[i][j];
 		}
 	}
 }
 
-void SkalarMultiplikation(int columns, int row, double matrix[columns][row], int multiplier, double rtnMatrix[columns][row])
+void SkalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], S32 multiplier, double rtnMatrix[row][columns])
 {
-		double matrixTmp[columns][row];
-		MatrixCopy(columns, row, matrixTmp, matrix);
-		int i = 0;
-		int j = 0;
-		for(i=0; i<columns; i++)
+		double matrixTmp[row][columns];
+		MatrixCopy(row, columns, matrixTmp, matrix);
+		S32 i = 0;
+		S32 j = 0;
+		for(i=0; i<row; i++)
 		{
-			for(j=0; j<row; j++)
+			for(j=0; j<columns; j++)
 			{
 				rtnMatrix[i][j] = matrixTmp[i][j] * multiplier;
 			}
@@ -46,28 +46,28 @@ void SkalarMultiplikation(int columns, int row, double matrix[columns][row], int
 
 }
 
-S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int rowSecond, double firstMatrix[columnsFirst][rowFirst], double secondMatrix[columnsSecond][rowSecond], double rtnMatrix[columnsFirst][rowSecond])
+S8 MatrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double firstMatrix[rowFirst][columnsFirst], double secondMatrix[rowSecond][columnsSecond], double rtnMatrix[rowFirst][columnsSecond])
 {
-	double firstMatrixTmp[columnsFirst][rowFirst];
-	double secondMatrixTmp[columnsSecond][rowSecond];
-	MatrixCopy(columnsFirst, rowFirst, firstMatrixTmp, firstMatrix);
-	MatrixCopy(columnsSecond, rowSecond, secondMatrixTmp, secondMatrix);
+	double firstMatrixTmp[rowFirst][columnsFirst];
+	double secondMatrixTmp[rowSecond][columnsSecond];
+	MatrixCopy(rowFirst, columnsFirst, firstMatrixTmp, firstMatrix);
+	MatrixCopy(rowSecond, columnsSecond, secondMatrixTmp, secondMatrix);
 	double sum = 0;
-	int i = 0;
-	int j = 0;
-	int k = 0;
+	S32 i = 0;
+	S32 j = 0;
+	S32 k = 0;
 	if(columnsFirst == rowSecond)
 	{
-		for(i=0; i<columnsFirst; i++)
+		for(i=0; i<rowFirst; i++)
 		{
-			for(j=0; j<rowSecond; j++)
+			for(j=0; j<columnsSecond; j++)
 			{
-				sum = 0;
-				for(k=0; k<columnsSecond; k++)
+				for(k=0; k<rowSecond; k++)
 				{
 					sum += firstMatrixTmp[i][k]*secondMatrixTmp[k][j];
 				}
 				rtnMatrix[i][j] = sum;
+				sum = 0;
 			}
 		}
 	}
@@ -79,15 +79,15 @@ S8 MatrixMultiplikation(int columnsFirst, int rowFirst, int columnsSecond, int r
 
 }
 
-void MatrixTranspose(int columns, int row, double Matrix[columns][row], double rtnMatrix[columns][row])
+void MatrixTranspose(S32 row, S32 columns, double Matrix[row][columns], double rtnMatrix[row][columns])
 {
-	double MatrixTmp[columns][row];
-	MatrixCopy(columns, row, MatrixTmp, Matrix);
-	int i = 0;
-	int j = 0;
-	for(i=0; i<columns; i++)
+	double MatrixTmp[row][columns];
+	MatrixCopy(row, columns, MatrixTmp, Matrix);
+	S32 i = 0;
+	S32 j = 0;
+	for(i=0; i<row; i++)
 	{
-		for(j=0; j<row; j++)
+		for(j=0; j<columns; j++)
 		{
 			rtnMatrix[j][i] = MatrixTmp[i][j];
 		}
@@ -95,7 +95,7 @@ void MatrixTranspose(int columns, int row, double Matrix[columns][row], double r
 }
 
 
-S8 MatrixInvers(int row, int columns, double Matrix[columns][row], double rtnMatrix[columns][row])
+S8 MatrixInvers(S32 row, S32 columns, double Matrix[columns][row], double rtnMatrix[columns][row])
 {
 	double MatrixTmp[columns][row];
 	MatrixCopy(columns, row, MatrixTmp, Matrix);
