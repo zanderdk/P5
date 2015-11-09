@@ -7,6 +7,7 @@
 #include "dist_nx_v3.h"
 #include "MatrixAlgebra.h"
 #include "PID.h"
+#include "weapon_system.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
@@ -33,7 +34,7 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
-#define VK 20.0
+#define VK 2.0
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
@@ -42,6 +43,7 @@ DeclareTask(Task2);
 double kalmanReading = 0;
 S8 speed = 0;
 double x[2][1] = {{0.0},{0.0}};
+long double deter = 100.0;
 
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -145,6 +147,7 @@ double x[2][1] = {{0.0},{0.0}};
         matrixAddition(2,1, x, y, x);        
 
         matrixMultiplikation(2,2,2,2, K, h, K);
+        deter = 10000000000.0 * matrixDeterminant(2, 2, K);
         p = (double *)&K[0][0];
         for(i=0; i < 4; i++)
             p[i] = (-p[i]);
@@ -229,7 +232,7 @@ double x[2][1] = {{0.0},{0.0}};
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
                 if(( motor_pos <= 50) || ( motor_pos >= -50)){
-                    MotorPID((U32)x[0][0] + 13, NXT_PORT_A);
+                    MotorPID((U32)x[0][0] + 7, NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -248,8 +251,17 @@ double x[2][1] = {{0.0},{0.0}};
         display_clear(1);
         display_goto_xy(0,0);
         display_int((S32)x[0][0], 7);
+        
+        display_goto_xy(0,1);
+        display_int((S32)deter, 7);
         display_update();
 
+        S32 shots = 0;
+        cock(NXT_PORT_B, NXT_PORT_C);
+        if(deter < 1.0 && shots == 0){
+            shots = fire(NXT_PORT_B, NXT_PORT_C);
+            cock(NXT_PORT_B, NXT_PORT_C);
+        }
         /*
         
           S8 speed = naive_speed(kalmanReading);

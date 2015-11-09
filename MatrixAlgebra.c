@@ -117,7 +117,7 @@ U8 matrixInvers(S32 row, S32 columns, double matrix[row][columns], double rtnMat
 	}
 }
 
-U8 matrixDeterminant(S32 row, S32 columns, double matrix[row][columns])
+long double matrixDeterminant(S32 row, S32 columns, double matrix[row][columns])
 {
 	if(row == 2 && columns == 2)
 	{
