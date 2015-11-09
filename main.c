@@ -5,8 +5,8 @@
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
 #include "dist_nx_v3.h"
-#include "PIDTarget.h"
 #include "MatrixAlgebra.h"
+#include "PID.h"
 
 #define ANGLE 60
 #define SAMPLESIZE 3
@@ -33,15 +33,15 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
-#define VK 11.0
-#define R 121.0
+#define VK 20.0
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
 DeclareTask(Task2);
 
-S8 kalmanReading = 0;
+double kalmanReading = 0;
 S8 speed = 0;
+double x[2][1] = {{0.0},{0.0}};
 
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -90,37 +90,68 @@ S8 speed = 0;
 
     }
 
-    void kalman(double zk[1][2])
+        void print2(double kk[2][1])
+    {       
+        display_clear(1);
+        display_goto_xy(0,0);
+        display_string("matrix:");
+        display_goto_xy(0, 1);
+        display_int((U32)(-100*kk[0][0]), 4);
+        display_goto_xy(6, 1);
+        display_int((U32)(-100*kk[1][0]), 4);
+    }
+
+    void kalman(double zn[2][1])
     {
         /* Kalman konstanter og */
 
         int i;
         double *p;
+        static double R[2][2] = {{VK*VK, 0.0},{0.0, VK*VK}};
         static double dt = 0.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-        static double Pk[2][2] = {{VK,0.0},{0.0,VK}};
-        double t = (dt == 0)? 0.006 : (double)systick_get_ms()-dt;
-        double h[2][2] = {{1,t},{0,1}};
-        double hT[2][2] = {{1,0},{t,1}};
-        double kk[2][2] = {{0,0}, {0,0}};
-
-        /* calc Kalman Gain */
-
-        matrixMultiplikation(2,2,2,2, Pk, hT, kk);
-        double kktemp[2][2] = {{0,0}};
-        matrixMultiplikation(2,2,2,2, h,Pk, kktemp);
-        matrixMultiplikation(2,2,2,2, kktemp, hT, kktemp);
-        p = (double *)&kktemp[0][0];
-        for(i = 0; i < 4; i++)
-            p[i] = p[i] + R;
-        matrixInvers(2, 2, kktemp, kktemp);
-        print4(kktemp);
-
-        matrixMultiplikation(2,2,2,2,kk,kktemp,kk);
+        static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
+        double t = (dt == 0)? 0.02 : ((double)systick_get_ms()-dt)/1000.0;
+        double h[2][2] = {{1.0,0.0},{0.0,1}};
+        double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
+        double a[2][2] = {{1.0, t},{0.0, 1.0}};
+        double aT[2][2] = {{1.0,0.0},{t,1.0}}; 
+        double S[2][2] = {{0.0,0.0},{0.0,0.0}};
+        double K[2][2] = {{0.0,0.0},{0.0,0.0}};
+        double y[2][1] = {{0.0},{0.0}};
 
 
+        /* calc Kalman Gain */ 
+        matrixMultiplikation(2,2,2,1, a, x, x);
+        matrixMultiplikation(2,2,2,2, a, P, P);
+        matrixMultiplikation(2,2,2,2, P, aT, P);
 
-        
+        matrixMultiplikation(2,2,2,1,h,x,y);
+        p = (double *)&y[0][0];
+        for(i=0; i < 2; i++)
+            p[i] = (-p[i]);
+
+        matrixAddition(2,1, zn,y,y);
+
+        matrixMultiplikation(2,2,2,2, h,P, S);
+        matrixMultiplikation(2,2,2,2,S,hT,S);
+        matrixAddition(2,2, S, R, S);
+        matrixInvers(2,2,S,S);
+
+        matrixMultiplikation(2,2,2,2, P, hT, K);
+        matrixMultiplikation(2,2,2,2, K, S, K);
+
+        matrixMultiplikation(2,2,2,1, K, y, y);
+        matrixAddition(2,1, x, y, x);        
+
+        matrixMultiplikation(2,2,2,2, K, h, K);
+        p = (double *)&K[0][0];
+        for(i=0; i < 4; i++)
+            p[i] = (-p[i]);
+
+        matrixAddition(2,2, I, K, K);
+        matrixMultiplikation(2,2,2,2, K, P, P);
+
         dt = t;
     }
 
@@ -148,11 +179,15 @@ S8 speed = 0;
     TASK(Task2)
     {   
         static S8 prev = UNKNOWN;
+        S8 flag = 0;
+        S8 flag2 = 0;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
-        if(left < RANGE_CLOSE && right < RANGE_CLOSE)
+        if(left < RANGE_CLOSE && right < RANGE_CLOSE){
             prev = CENTER;
+            flag2 = 1;
+        }
         else if(left < RANGE_FAR)
             prev = LEFT_2;
         else if(left < RANGE_CLOSE){
@@ -174,31 +209,31 @@ S8 speed = 0;
         else prev = UNKNOWN;
 
         if(prev == LEFT_3)
-            kalmanReading = LEFT_2;
+            kalmanReading = -13.1705;
         else if(prev == RIGHT_3)
-            kalmanReading = RIGHT_2;
+            kalmanReading = 18.94;
         else if(prev == LEFT_4)
-            kalmanReading = LEFT_3;
+            kalmanReading = -50;
         else if(prev == RIGHT_4)
-            kalmanReading = RIGHT_3;
-        else if(prev == UNKNOWN)
-            kalmanReading = 4;
-        else kalmanReading = prev;
+            kalmanReading = 50;
+        else if(prev == UNKNOWN){
+            nxt_motor_set_speed(NXT_PORT_A, 0, 0);
+            flag = 1;
+        }
+        else kalmanReading = (((double)prev) * 5.418);
+        
+        kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
-        /* display_clear(1); */
-        /*  */
-        /* display_goto_xy(0, 0); */
-        /* display_string("Kalman reading:"); */
-        /* display_goto_xy(1, 1); */
-        /* display_int(kalmanReading, 5); */
-        /*  */
-        /* display_goto_xy(0, 2); */
-        /* display_string("Prev:"); */
-        /* display_goto_xy(1, 3); */
-        /* display_int(prev, 5); */
-
-
-        systick_wait_ms(15);
+        if(!flag){
+            double zn[2][1] = {{kalmanReading}, {0}};
+            kalman(zn);
+                S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
+                if(( motor_pos <= 50) || ( motor_pos >= -50)){
+                    MotorPID((U32)x[0][0] + 13, NXT_PORT_A);
+                }
+                else
+                    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+        }
        
         TerminateTask();
     }
@@ -206,11 +241,17 @@ S8 speed = 0;
     TASK(Task1)
     {
 
-      double dummy[1][2] = {{1,1}};
-      kalman(dummy);
-
+       nxt_motor_set_count(NXT_PORT_A, 13);
+        
       while(1){
+
+        display_clear(1);
+        display_goto_xy(0,0);
+        display_int((S32)x[0][0], 7);
+        display_update();
+
         /*
+        
           S8 speed = naive_speed(kalmanReading);
           S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 
@@ -223,8 +264,10 @@ S8 speed = 0;
             nxt_motor_set_speed(NXT_PORT_A, 0, 1);
         */
 
-    	  systick_wait_ms(15);
-      }
+    	  systick_wait_ms(50);
+
+        }
+      
     }
 
 	

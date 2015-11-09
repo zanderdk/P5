@@ -25,7 +25,7 @@
         PRIORITY = 2; /* Smaller value means lower priority */
         ACTIVATION = 1;
         SCHEDULE = FULL;
-        STACKSIZE = 512; /* Stack size */
+        STACKSIZE = 1024; /* Stack size */
       };
 
       /* Definition of OSEK_Task_Background */
@@ -59,7 +59,7 @@
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 300; /* Task2 is executed every  x msec */
+      CYCLETIME = 20; /* Task2 is executed every  x msec */
       APPMODE = appmode1;
     };
   };
