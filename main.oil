@@ -63,4 +63,19 @@
       APPMODE = appmode1;
     };
   };
+  
+  ALARM cyclic_alarm2
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+      TASK = Task3;
+    };
+    AUTOSTART = TRUE
+    {
+      ALARMTIME = 1;
+      CYCLETIME = 20; /* Task2 is executed every  x msec */
+      APPMODE = appmode1;
+    };
+  };
 };
