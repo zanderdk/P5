@@ -46,7 +46,7 @@ void skalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], dou
 
 }
 
-S8 matrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double firstMatrix[rowFirst][columnsFirst], double secondMatrix[rowSecond][columnsSecond], double rtnMatrix[rowFirst][columnsSecond])
+U8 matrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double firstMatrix[rowFirst][columnsFirst], double secondMatrix[rowSecond][columnsSecond], double rtnMatrix[rowFirst][columnsSecond])
 {
 	double firstMatrixTmp[rowFirst][columnsFirst];
 	double secondMatrixTmp[rowSecond][columnsSecond];
@@ -95,7 +95,7 @@ void matrixTranspose(S32 row, S32 columns, double matrix[row][columns], double r
 }
 
 
-S8 matrixInvers(S32 row, S32 columns, double matrix[row][columns], double rtnMatrix[row][columns])
+U8 matrixInvers(S32 row, S32 columns, double matrix[row][columns], double rtnMatrix[row][columns])
 {
 	double matrixTmp[row][columns];
 	matrixCopy(row, columns, matrixTmp, matrix);
@@ -116,3 +116,17 @@ S8 matrixInvers(S32 row, S32 columns, double matrix[row][columns], double rtnMat
 		return -1;
 	}
 }
+
+U8 matrixDeterminant(S32 row, S32 columns, double matrix[row][columns])
+{
+	if(row == 2 && columns == 2)
+	{
+		return matrix[0][0]*matrix[1][1]-matrix[0][1]*matrix[1][0];
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+
