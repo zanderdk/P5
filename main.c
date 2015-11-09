@@ -38,7 +38,7 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
-#define VK 2.0
+#define VK 11.0
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
@@ -245,7 +245,7 @@ long double deter = 100.0;
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
                 if(( motor_pos <= 50) || ( motor_pos >= -50)){
-                    MotorPID((U32)x[0][0] + 7, NXT_PORT_A);
+                    MotorPID((U32)x[0][0] + 13, NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -259,37 +259,35 @@ long double deter = 100.0;
 
        nxt_motor_set_count(NXT_PORT_A, 13);
         
-      while(1){
+        while(1){
+            display_clear(1);
+            display_goto_xy(0,0);
+            display_int((S32)x[0][0], 7);
+            
+            display_goto_xy(0,1);
+            display_int((S32)deter, 7);
+            display_update();
 
-        display_clear(1);
-        display_goto_xy(0,0);
-        display_int((S32)x[0][0], 7);
-        
-        display_goto_xy(0,1);
-        display_int((S32)deter, 7);
-        display_update();
-
-        S32 shots = 0;
-        cock();
-        if(deter < 1.0 && shots == 0){
-            shots = fire();
-        }
-        /*
-        
-          S8 speed = naive_speed(kalmanReading);
-          S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-
-          if(( speed > 0 && motor_pos <= 50) || ( speed < 0 && motor_pos >= -50)){
-            nxt_motor_set_speed(NXT_PORT_A, speed, 0);
-            if(speed == 0)
-                nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+            static S32 shots = 0;
+            cock();
+            if(deter < 1.0 && shots == 0){
+                shots = fire();
             }
-          else
-            nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-        */
+            
+            /*
+            S8 speed = naive_speed(kalmanReading);
+            S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 
-    	  systick_wait_ms(50);
+            if(( speed > 0 && motor_pos <= 50) || ( speed < 0 && motor_pos >= -50)){
+                nxt_motor_set_speed(NXT_PORT_A, speed, 0);
+                if(speed == 0)
+                    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+            }
+            else
+                nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+            */
 
+            systick_wait_ms(50);
         }
       
     }
