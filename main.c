@@ -8,6 +8,10 @@
 #include "MatrixAlgebra.h"
 #include "PID.h"
 
+#define WSMOTOR1 NXT_PORT_B
+#define WSMOTOR2 NXT_PORT_C
+
+
 #define ANGLE 60
 #define SAMPLESIZE 3
 
@@ -39,6 +43,7 @@ DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
 DeclareTask(Task2);
 
+U32 WSRotation = 0;
 double kalmanReading = 0;
 S8 speed = 0;
 double x[2][1] = {{0.0},{0.0}};
@@ -174,6 +179,12 @@ double x[2][1] = {{0.0},{0.0}};
         default:
             return MOTOR_STOP;
     }
+    }
+
+    TASK(Task3)
+    {
+    	MotorPID(WSRotation,WSMOTOR1);
+    	MotorPID(WSRotation,WSMOTOR2);
     }
 
     TASK(Task2)
