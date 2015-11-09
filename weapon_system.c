@@ -2,7 +2,7 @@
 #include "ecrobot_interface.h"
 
 static S32 shotsfired = 0;
-extern WSRotation;
+extern S32 WSRotation;
 
 /*void cock(U8 motor1, U8 motor2){
 	S32 cAngle = shotsfired * 300 + 227;

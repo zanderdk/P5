@@ -18,11 +18,21 @@
       /* Definition of application mode */
       APPMODE appmode1{};
 
+      /* Definition of Task3 */
+      TASK Task3
+      {
+        AUTOSTART = FALSE;
+        PRIORITY = 2; /* Smaller value means lower priority */
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512; /* Stack size */
+      };
+
       /* Definition of Task2 */
       TASK Task2
       {
         AUTOSTART = FALSE;
-        PRIORITY = 2; /* Smaller value means lower priority */
+        PRIORITY = 3; /* Smaller value means lower priority */
         ACTIVATION = 1;
         SCHEDULE = FULL;
         STACKSIZE = 1024; /* Stack size */

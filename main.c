@@ -43,6 +43,7 @@
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
 DeclareTask(Task2);
+DeclareTask(Task3);
 
 U32 WSRotation = 0;
 double kalmanReading = 0;
@@ -188,6 +189,7 @@ long double deter = 100.0;
     {
     	MotorPID(WSRotation,WSMOTOR1);
     	MotorPID(WSRotation,WSMOTOR2);
+        TerminateTask();
     }
 
     TASK(Task2)
@@ -268,10 +270,9 @@ long double deter = 100.0;
         display_update();
 
         S32 shots = 0;
-        cock(NXT_PORT_B, NXT_PORT_C);
+        cock();
         if(deter < 1.0 && shots == 0){
-            shots = fire(NXT_PORT_B, NXT_PORT_C);
-            cock(NXT_PORT_B, NXT_PORT_C);
+            shots = fire();
         }
         /*
         
