@@ -38,7 +38,7 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
-#define VK 11.0
+#define VK 2.0
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
@@ -48,7 +48,7 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 double kalmanReading = 0;
 S8 speed = 0;
-double x[2][1] = {{0.0},{0.0}};
+double x[2][1] = {{0.0},{0.03}};
 long double deter = 100.0;
 
 
@@ -77,6 +77,9 @@ long double deter = 100.0;
     	//ecrobot_term_bt_connection();
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
     	ecrobot_term_dist_sensor(NXT_PORT_S2);
+        nxt_motor_set_speed(NXT_PORT_A,0,1);
+        nxt_motor_set_speed(NXT_PORT_B,0,1);
+        nxt_motor_set_speed(NXT_PORT_C,0,1);
     	//ecrobot_term_dist_v3_sensor(NXT_PORT_S3);
 
     }
@@ -196,7 +199,7 @@ long double deter = 100.0;
     {   
         static S8 prev = UNKNOWN;
         S8 flag = 0;
-        S8 flag2 = 0;
+        static S8 flag2 = 0;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
@@ -229,23 +232,23 @@ long double deter = 100.0;
         else if(prev == RIGHT_3)
             kalmanReading = 18.94;
         else if(prev == LEFT_4)
-            kalmanReading = -50;
+            kalmanReading = -30;
         else if(prev == RIGHT_4)
-            kalmanReading = 50;
+            kalmanReading = 30;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
             flag = 1;
         }
         else kalmanReading = (((double)prev) * 5.418);
         
-        kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
         if(!flag){
+            kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
             double zn[2][1] = {{kalmanReading}, {0}};
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-                if(( motor_pos <= 50) || ( motor_pos >= -50)){
-                    MotorPID((U32)x[0][0] + 13, NXT_PORT_A);
+                if((motor_pos <= 155) && (motor_pos >= 45) && flag2){
+                    MotorPID((U32)x[0][0], NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -254,10 +257,15 @@ long double deter = 100.0;
         TerminateTask();
     }
 
+    int motor_in_range(int range){
+        return (nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0]) - range &&
+                nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
+    }
+
     TASK(Task1)
     {
 
-       nxt_motor_set_count(NXT_PORT_A, 13);
+       nxt_motor_set_count(NXT_PORT_A, 100);
         
         while(1){
             display_clear(1);
@@ -270,7 +278,7 @@ long double deter = 100.0;
 
             static S32 shots = 0;
             cock();
-            if(deter < 1.0 && shots == 0){
+            if(deter <= 5.0 && motor_in_range(7) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
                 shots = fire();
             }
             
