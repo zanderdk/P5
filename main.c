@@ -77,6 +77,9 @@ long double deter = 100.0;
     	ecrobot_term_bt_connection();
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
     	ecrobot_term_dist_sensor(NXT_PORT_S2);
+    	nxt_motor_set_speed(NXT_PORT_A,0,1);
+    	nxt_motor_set_speed(NXT_PORT_B,0,1);
+    	nxt_motor_set_speed(NXT_PORT_C,0,1);
     	//ecrobot_term_dist_v3_sensor(NXT_PORT_S3);
 
     }
