@@ -66,7 +66,7 @@ long double deter = 100.0;
 
     void ecrobot_device_initialize(void)
     {
-    	//ecrobot_init_bt_slave("1234");
+    	ecrobot_init_bt_slave("1234");
         ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
         ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM, 0);
         //ecrobot_init_dist_v3_sensor(NXT_PORT_S3);
@@ -74,7 +74,7 @@ long double deter = 100.0;
     
     void ecrobot_device_terminate(void)
     {
-    	//ecrobot_term_bt_connection();
+    	ecrobot_term_bt_connection();
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
     	ecrobot_term_dist_sensor(NXT_PORT_S2);
     	//ecrobot_term_dist_v3_sensor(NXT_PORT_S3);
@@ -254,6 +254,18 @@ long double deter = 100.0;
         TerminateTask();
     }
 
+    void bt_data_logger(void)
+    {
+	static U8 data_log_buffer[16];
+
+	*((U32 *)(&data_log_buffer[0]))  = (S32)kalmanReading;
+	*((S32 *)(&data_log_buffer[4]))  = (S32)x[0][0];
+	*((S32 *)(&data_log_buffer[8]))  = (S32)x[1][0];
+	*((S32 *)(&data_log_buffer[12]))  = (S32)nxt_motor_get_count(NXT_PORT_A);
+		
+	ecrobot_send_bt(data_log_buffer, 0, 16);
+    }
+
     TASK(Task1)
     {
 
@@ -273,27 +285,12 @@ long double deter = 100.0;
             if(deter < 1.0 && shots == 0){
                 shots = fire();
             }
+            bt_data_logger();
             
-            /*
-            S8 speed = naive_speed(kalmanReading);
-            S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-
-            if(( speed > 0 && motor_pos <= 50) || ( speed < 0 && motor_pos >= -50)){
-                nxt_motor_set_speed(NXT_PORT_A, speed, 0);
-                if(speed == 0)
-                    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-            }
-            else
-                nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-            */
-
             systick_wait_ms(50);
         }
       
     }
-
-	
-
 
 
 
