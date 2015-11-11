@@ -25,12 +25,12 @@ S32 fire(U8 motor1, U8 motor2){
 
 void cock()
 {
-	WSRotation = shotsfired * 300 + 200;
+	WSRotation = shotsfired * 300 + 175;
 }
 
 
 S32 fire()
 {
-	WSRotation = shotsfired*300 + 325;
+	WSRotation = shotsfired * 300 + 175;
 	return ++shotsfired;
 }
