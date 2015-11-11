@@ -4,14 +4,12 @@
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
-#include "dist_nx_v3.h"
 #include "MatrixAlgebra.h"
 #include "PID.h"
 #include "weapon_system.h"
 
 #define WSMOTOR1 NXT_PORT_B
 #define WSMOTOR2 NXT_PORT_C
-
 
 #define ANGLE 60
 #define SAMPLESIZE 3
@@ -45,12 +43,22 @@ DeclareTask(Task1);
 DeclareTask(Task2);
 DeclareTask(Task3);
 
-U32 WSRotation = 0;
-double kalmanReading = 0;
+void reset(void);
+
 S8 speed = 0;
-double x[2][1] = {{0.0},{0.03}};
+S8 flag3 = 0;
+S32 shots = 0;
+U32 WSRotation = 0;
+S8 flag2 = 0;
+S32 stopSpeed = 100;
+S8 prev = UNKNOWN;
+double kalmanReading = 0;
 long double deter = 100.0;
-static S8 flag3 = 0;
+double x[2][1] = {{0.0},{0.03}};
+double R[2][2] = {{VK*VK, 0.0},{0.0, VK*VK}};
+double dt = 0.0;
+double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
+double P[2][2] = {{1.0,0.0},{0.0,1.0}};
 
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -73,12 +81,9 @@ static S8 flag3 = 0;
     
     void ecrobot_device_terminate(void)
     {
+        reset();
     	ecrobot_term_dist_sensor(NXT_PORT_S1);
     	ecrobot_term_dist_sensor(NXT_PORT_S2);
-        nxt_motor_set_speed(NXT_PORT_A,0,1);
-        nxt_motor_set_speed(NXT_PORT_B,0,1);
-        nxt_motor_set_speed(NXT_PORT_C,0,1);
-
     }
 
     void print4(double kk[2][2])
@@ -98,7 +103,7 @@ static S8 flag3 = 0;
 
     }
 
-        void print2(double kk[2][1])
+    void print2(double kk[2][1])
     {       
         display_clear(1);
         display_goto_xy(0,0);
@@ -109,25 +114,32 @@ static S8 flag3 = 0;
         display_int((U32)(-100*kk[1][0]), 4);
     }
 
+    void reset(void)
+    {
+        dt = 0.0;
+        stopSpeed = 100;
+        flag2 = 0;
+        prev = UNKNOWN;
+        P = {{1.0,0.0},{0.0,1.0}};
+        shots = 0;
+        nxt_motor_set_speed(NXT_PORT_A,0,1);
+        nxt_motor_set_speed(NXT_PORT_B,0,1);
+        nxt_motor_set_speed(NXT_PORT_C,0,1);
+        //kenneth fix cock reset.
+    }
+
+
     void kalman(double zn[2][1])
     {
         /* Kalman konstanter og */
-
         int i;
         double *p;
-        static double R[2][2] = {{VK*VK, 0.0},{0.0, VK*VK}};
-        static double dt = 0.0;
-        static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-        static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
         double t = (dt == 0)? 0.01 : ((double)systick_get_ms()-dt)/1000.0;
-        //double h[2][2] = {{1.0,0.0},{0.0,1}};
-        //double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
         double a[2][2] = {{1.0, t},{0.0, 1.0}};
         double aT[2][2] = {{1.0,0.0},{t,1.0}}; 
         double S[2][2] = {{0.0,0.0},{0.0,0.0}};
         double K[2][2] = {{0.0,0.0},{0.0,0.0}};
         double y[2][1] = {{0.0},{0.0}};
-
 
         /* calc Kalman Gain */ 
         matrixMultiplikation(2,2,2,1, a, x, x);
@@ -157,7 +169,7 @@ static S8 flag3 = 0;
         matrixMultiplikation(2,2,2,1, K, y, y);
         matrixAddition(2,1, x, y, x);        
 
-        deter = 10000000000.0 * matrixDeterminant(2, 2, K);
+        deter = 0x4202A05F20000000 * matrixDeterminant(2, 2, K);
         p = (double *)&K[0][0];
         for(i=0; i < 4; i++)
             p[i] = (-p[i]);
@@ -198,9 +210,7 @@ static S8 flag3 = 0;
 
     TASK(Task2)
     {   
-        static S8 prev = UNKNOWN;
         S8 flag = 0;
-        static S8 flag2 = 0;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
@@ -281,20 +291,16 @@ static S8 flag3 = 0;
             display_int((S32)deter, 7);
             display_update();
 
-            static S32 shots = 0;
             if(flag3){
             	cock();
         		if(deter <= 10.0 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 150){
             		shots = fire();
+                    while(!(nxt_motor_get_count(NXT_PORT_A) < 105 && nxt_motor_get_count(NXT_PORT_A) > 95 && stopSpeed < 40))
+                        stopSpeed = MotorPID(100, NXT_PORT_A);
+                    reset();
         		}
             }
             systick_wait_ms(50);
         }
-      
     }
-
-	
-
-
-
 
