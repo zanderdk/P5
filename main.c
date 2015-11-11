@@ -288,7 +288,7 @@ long double deter = 100.0;
 
             static S32 shots = 0;
             //cock();
-            if(deter <= 5.0 && motor_in_range(7) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
+            if(deter <= 10.0 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
                 shots = fire();
             }
             

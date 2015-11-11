@@ -31,6 +31,6 @@ void cock()
 
 S32 fire()
 {
-	WSRotation = shotsfired*150;
+	WSRotation = shotsfired*300 + 325;
 	return ++shotsfired;
 }
