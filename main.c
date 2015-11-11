@@ -119,7 +119,7 @@ static S8 flag3 = 0;
         static double dt = 0.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
         static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
-        double t = (dt == 0)? 0.02 : ((double)systick_get_ms()-dt)/1000.0;
+        double t = (dt == 0)? 0.01 : ((double)systick_get_ms()-dt)/1000.0;
         //double h[2][2] = {{1.0,0.0},{0.0,1}};
         //double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
         double a[2][2] = {{1.0, t},{0.0, 1.0}};
