@@ -123,8 +123,8 @@ long double deter = 100.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
         static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
         double t = (dt == 0)? 0.02 : ((double)systick_get_ms()-dt)/1000.0;
-        double h[2][2] = {{1.0,0.0},{0.0,1}};
-        double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
+        //double h[2][2] = {{1.0,0.0},{0.0,1}};
+        //double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
         double a[2][2] = {{1.0, t},{0.0, 1.0}};
         double aT[2][2] = {{1.0,0.0},{t,1.0}}; 
         double S[2][2] = {{0.0,0.0},{0.0,0.0}};
@@ -137,25 +137,29 @@ long double deter = 100.0;
         matrixMultiplikation(2,2,2,2, a, P, P);
         matrixMultiplikation(2,2,2,2, P, aT, P);
 
-        matrixMultiplikation(2,2,2,1,h,x,y);
         p = (double *)&y[0][0];
-        for(i=0; i < 2; i++)
-            p[i] = (-p[i]);
+        for(i = 0; i < 2; i++)
+        	p[i] = -((double *)x)[i];
 
         matrixAddition(2,1, zn,y,y);
 
-        matrixMultiplikation(2,2,2,2, h,P, S);
-        matrixMultiplikation(2,2,2,2,S,hT,S);
+
+        p = (double *)&S[0][0];
+        for(i = 0; i < 4; i++)
+        	p[i] = ((double *)P)[i];
+
         matrixAddition(2,2, S, R, S);
         matrixInvers(2,2,S,S);
 
-        matrixMultiplikation(2,2,2,2, P, hT, K);
+        p = (double *)&K[0][0];
+        for(i = 0; i < 4; i++)
+        	p[i] = ((double *)P)[i];
+
         matrixMultiplikation(2,2,2,2, K, S, K);
 
         matrixMultiplikation(2,2,2,1, K, y, y);
         matrixAddition(2,1, x, y, x);        
 
-        matrixMultiplikation(2,2,2,2, K, h, K);
         deter = 10000000000.0 * matrixDeterminant(2, 2, K);
         p = (double *)&K[0][0];
         for(i=0; i < 4; i++)
@@ -205,21 +209,27 @@ long double deter = 100.0;
 
         if(left < RANGE_CLOSE && right < RANGE_CLOSE){
             prev = CENTER;
-            flag2 = 1;
+            //flag2 = 1;
         }
         else if(left < RANGE_FAR)
             prev = LEFT_2;
         else if(left < RANGE_CLOSE){
             if(prev == UNKNOWN || prev == LEFT_4 || prev == LEFT_3)
                 prev = LEFT_3;
-            else prev = LEFT_1;
+            else {
+            	prev = LEFT_1;
+            	flag2 = 1;
+            }
         }
         else if(right < RANGE_FAR)
             prev = RIGHT_2;
         else if(right < RANGE_CLOSE){
             if(prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
                 prev = RIGHT_3;
-            else prev = RIGHT_1;
+            else {
+            	prev = RIGHT_1;
+            	//flag2 = 1;
+            }
         }
         else if(prev < 0)
             prev = LEFT_4;
@@ -248,7 +258,7 @@ long double deter = 100.0;
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
                 if((motor_pos <= 155) && (motor_pos >= 45) && flag2){
-                    MotorPID((U32)x[0][0], NXT_PORT_A);
+                    MotorPID(((U32)x[0][0]), NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);

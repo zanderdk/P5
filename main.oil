@@ -69,7 +69,7 @@
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 20; /* Task2 is executed every  x msec */
+      CYCLETIME = 10; /* Task2 is executed every  x msec */
       APPMODE = appmode1;
     };
   };
@@ -84,7 +84,7 @@
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 20; /* Task2 is executed every  x msec */
+      CYCLETIME = 40; /* Task2 is executed every  x msec */
       APPMODE = appmode1;
     };
   };
