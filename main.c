@@ -209,7 +209,7 @@ long double deter = 100.0;
 
         if(left < RANGE_CLOSE && right < RANGE_CLOSE){
             prev = CENTER;
-            //flag2 = 1;
+            flag2 = 1;
         }
         else if(left < RANGE_FAR)
             prev = LEFT_2;
@@ -257,8 +257,8 @@ long double deter = 100.0;
             double zn[2][1] = {{kalmanReading}, {0}};
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-                if((motor_pos <= 155) && (motor_pos >= 45) && flag2){
-                    MotorPID(((U32)x[0][0]), NXT_PORT_A);
+                if((motor_pos <= 200) && (motor_pos >= 45) && flag2){
+                    MotorPID(((U32)x[0][0]) + 13, NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -287,7 +287,7 @@ long double deter = 100.0;
             display_update();
 
             static S32 shots = 0;
-            cock();
+            //cock();
             if(deter <= 5.0 && motor_in_range(7) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
                 shots = fire();
             }
