@@ -1,7 +1,7 @@
 #include "PID.h"
 #include "ecrobot_interface.h"
 
-static S32 shotsfired = 0;
+extern S32 shotsfired;
 extern S32 WSRotation;
 
 /*void cock(U8 motor1, U8 motor2){
@@ -31,6 +31,7 @@ void cock()
 
 S32 fire()
 {
+	shotsfired++;
 	WSRotation = shotsfired * 300 + 175;
-	return ++shotsfired;
+	return shotsfired;
 }

@@ -45,10 +45,11 @@ DeclareTask(Task3);
 
 void reset(void);
 
+S32 shotsfired = 0;
 S8 speed = 0;
 S8 flag3 = 0;
 S32 shots = 0;
-U32 WSRotation = 0;
+S32 WSRotation = 0;
 S8 flag2 = 0;
 S32 stopSpeed = 100;
 S8 prev = UNKNOWN;
@@ -120,8 +121,12 @@ double P[2][2] = {{1.0,0.0},{0.0,1.0}};
         stopSpeed = 100;
         flag2 = 0;
         prev = UNKNOWN;
-        P = {{1.0,0.0},{0.0,1.0}};
+        P[0][0] = 1.0;
+        P[0][1] = 0.0;
+        P[1][0] = 0.0;
+        P[1][1] = 1.0;
         shots = 0;
+        shotsfired = 0;
         nxt_motor_set_speed(NXT_PORT_A,0,1);
         nxt_motor_set_speed(NXT_PORT_B,0,1);
         nxt_motor_set_speed(NXT_PORT_C,0,1);
@@ -169,7 +174,7 @@ double P[2][2] = {{1.0,0.0},{0.0,1.0}};
         matrixMultiplikation(2,2,2,1, K, y, y);
         matrixAddition(2,1, x, y, x);        
 
-        deter = 0x4202A05F20000000 * matrixDeterminant(2, 2, K);
+        deter = 10000000000 * matrixDeterminant(2, 2, K);
         p = (double *)&K[0][0];
         for(i=0; i < 4; i++)
             p[i] = (-p[i]);
@@ -295,9 +300,11 @@ double P[2][2] = {{1.0,0.0},{0.0,1.0}};
             	cock();
         		if(deter <= 10.0 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 150){
             		shots = fire();
+            		systick_wait_ms(500);
                     while(!(nxt_motor_get_count(NXT_PORT_A) < 105 && nxt_motor_get_count(NXT_PORT_A) > 95 && stopSpeed < 40))
                         stopSpeed = MotorPID(100, NXT_PORT_A);
                     reset();
+                    systick_wait_ms(500);
         		}
             }
             systick_wait_ms(50);
