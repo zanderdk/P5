@@ -48,7 +48,8 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 double kalmanReading = 0;
 S8 speed = 0;
-double x[2][1] = {{0.0},{0.03}};
+double x[2][1] = {{100.0},{0.0}};
+double xm[2][1] = {{100.0},{0.0}};
 long double deter = 100.0;
 static S8 flag3 = 0;
 
@@ -116,56 +117,52 @@ static S8 flag3 = 0;
         int i;
         double *p;
         static double R[2][2] = {{VK*VK, 0.0},{0.0, VK*VK}};
-        static double dt = 0.0;
+        static double prev_time = 0.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
         static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
-        double t = (dt == 0)? 0.02 : ((double)systick_get_ms()-dt)/1000.0;
+        double current = (double)systick_get_ms();
+        double t = (prev_time == 0)? 0.01 : (current-prev_time)/1000.0;
+        double tt = (prev_time == 0)? 0.01 : ((current - prev_time + 1200.0) / 1000.0);
         //double h[2][2] = {{1.0,0.0},{0.0,1}};
         //double hT[2][2] = {{1.0, 0.0},{0.0,1.0}};
         double a[2][2] = {{1.0, t},{0.0, 1.0}};
         double aT[2][2] = {{1.0,0.0},{t,1.0}}; 
-        double S[2][2] = {{0.0,0.0},{0.0,0.0}};
+        double am[2][2] = {{1.0, tt},{0.0, 1.0}};
         double K[2][2] = {{0.0,0.0},{0.0,0.0}};
         double y[2][1] = {{0.0},{0.0}};
 
+        /* kalman gain in K */
+        matrixAddition(2,2, P, R, K);
+        matrixInvers(2,2, K, K);
+        matrixMultiplikation(2,2,2,2, P, K, K);
+        deter = matrixDeterminant(2, 2, K) * 10000000000.0 / 100000.0;
 
-        /* calc Kalman Gain */ 
-        matrixMultiplikation(2,2,2,1, a, x, x);
-        matrixMultiplikation(2,2,2,2, a, P, P);
-        matrixMultiplikation(2,2,2,2, P, aT, P);
-
+        /*kalman estimate */
         p = (double *)&y[0][0];
         for(i = 0; i < 2; i++)
-        	p[i] = -((double *)x)[i];
+            p[i] = -((double *)&x[0][0])[i];
 
-        matrixAddition(2,1, zn,y,y);
-
-
-        p = (double *)&S[0][0];
-        for(i = 0; i < 4; i++)
-        	p[i] = ((double *)P)[i];
-
-        matrixAddition(2,2, S, R, S);
-        matrixInvers(2,2,S,S);
-
-        p = (double *)&K[0][0];
-        for(i = 0; i < 4; i++)
-        	p[i] = ((double *)P)[i];
-
-        matrixMultiplikation(2,2,2,2, K, S, K);
-
+        matrixAddition(2,1, zn, y, y);
         matrixMultiplikation(2,2,2,1, K, y, y);
-        matrixAddition(2,1, x, y, x);        
+        matrixAddition(2,1, x, y, x);
 
-        deter = 10000000000.0 * matrixDeterminant(2, 2, K);
+        /*kalman covariance */
         p = (double *)&K[0][0];
-        for(i=0; i < 4; i++)
-            p[i] = (-p[i]);
+        for(i = 0; i < 4; i++)
+            p[i] = -((double *)&K[0][0])[i];
 
+        /* project into k+1 */
         matrixAddition(2,2, I, K, K);
         matrixMultiplikation(2,2,2,2, K, P, P);
 
-        dt = t;
+        matrixMultiplikation(2, 2, 2, 1, a, x, x);
+        matrixMultiplikation(2,2,2,2, a, P, P);
+        matrixMultiplikation(2,2,2,2, P, aT, P);
+
+        matrixMultiplikation(2, 2, 2, 1, am, x, xm);
+        xm[0][0] += 20.0; 
+
+        prev_time = current;
     }
 
     S8 naive_speed(S8 reading){
@@ -248,12 +245,12 @@ static S8 flag3 = 0;
 
         if(!flag){
             kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
-            double zn[2][1] = {{kalmanReading}, {0}};
+            double zn[2][1] = {{kalmanReading}, {13}};
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-                if((motor_pos <= 200) && (motor_pos >= 45) && flag2){
+                if((motor_pos <= 200) && (motor_pos >= 45) && ((S32)xm[0][0]) > 100 && flag2){
                 	flag3 = 1;
-                    MotorPID(((U32)x[0][0]) + 5, NXT_PORT_A);
+                    MotorPID(((U32)xm[0][0]), NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -263,8 +260,8 @@ static S8 flag3 = 0;
     }
 
     int motor_in_range(int range){
-        return (nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0]) - range &&
-                nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
+        return (nxt_motor_get_count(NXT_PORT_A) > ((S32)xm[0][0]) - range &&
+                nxt_motor_get_count(NXT_PORT_A) < ((S32)xm[0][0]) + range);
     }
 
     TASK(Task1)
@@ -275,10 +272,16 @@ static S8 flag3 = 0;
         while(1){
             display_clear(1);
             display_goto_xy(0,0);
-            display_int((S32)x[0][0], 7);
-            
+            display_int((S32)xm[0][0], 7);
+
             display_goto_xy(0,1);
-            display_int((S32)deter, 7);
+            display_int(((S32)deter), 7);
+            display_update();
+            
+            display_goto_xy(0,2);
+            display_string("Speed:");
+            display_goto_xy(0,3);
+            display_int(((S32)x[0][1] * 10), 7);
             display_update();
 
             static S32 shots = 0;
