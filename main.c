@@ -4,7 +4,6 @@
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
-#include "dist_nx_v3.h"
 #include "MatrixAlgebra.h"
 #include "PID.h"
 #include "weapon_system.h"
@@ -48,8 +47,9 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 double kalmanReading = 0;
 S8 speed = 0;
-double speeed = 0.0;
-double x[2][1] = {{75.0},{0.0}};
+double speeed = 25.0;
+double posPrev = 87.0;
+double x[2][1] = {{87.0},{0.0}};
 double xm[2][1] = {{100.0},{0.0}};
 long double deter = 100.0;
 static S8 flag3 = 0;
@@ -200,7 +200,7 @@ static S8 flag3 = 0;
         S8 flag = 0;
         static S8 flag4 = 0;
         static S8 flag2 = 0;
-        static double prevKalman = 0.0;
+        static double prevKalman = 100.0;
         static double prevTime = 0.0;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
@@ -209,7 +209,6 @@ static S8 flag3 = 0;
         if(left < RANGE_CLOSE && right < RANGE_CLOSE){
             prev = CENTER;
             flag2 = 1;
-            prevTime = systick_get_ms();
         }
         else if(left < RANGE_FAR)
             prev = LEFT_2;
@@ -234,47 +233,59 @@ static S8 flag3 = 0;
             prev = RIGHT_4;
         else prev = UNKNOWN;
 
-        if(prev == LEFT_3)
+        if(prev == LEFT_3){
             kalmanReading = -13.1705;
+            if(!flag4){
+            	prevTime = systick_get_ms()/1000; flag4 = 1;}
+        }
         else if(prev == RIGHT_3)
             kalmanReading = 18.94;
         else if(prev == LEFT_4)
-            kalmanReading = -50;
+            kalmanReading = -speeed;
         else if(prev == RIGHT_4)
-            kalmanReading = 50;
+            kalmanReading = speeed;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
             flag = 1;
         }
-        else kalmanReading = (((double)prev) * 5.418);
-        
-        if(kalmanReading > 0 && !flag4)
-        	flag4 = 1;
+        else {
+            if(!flag4){
+            	prevTime = systick_get_ms()/1000; flag4 = 1;}
+        	kalmanReading = (((double)prev) * 5.418);
+        }
 
-        if(!flag && flag4){
+        if(!flag){
             kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
-            if(kalmanReading != prevKalman && flag4)
-            {
-            	double current = (((double)systick_get_ms())/1000);
-            	double sp = speeed;
-            	speeed = (kalmanReading - prevKalman)/(current - prevTime);
-            	if(!(speeed < 70.0 && speeed > 2.0))
-            		speeed = sp;
-            	prevTime = current;
-            	prevKalman = kalmanReading;
+				if(kalmanReading > prevKalman && flag4)
+				{
+					double current = (((double)systick_get_ms())/1000);
+					double sp = speeed;
+					speeed = (kalmanReading - prevKalman)/(current - prevTime);
+					if(!(speeed < 80.0 && speeed > 20.0))
+					{
+						speeed = sp;
+					}
+					else
+					{
+						speeed = (sp + speeed)/2;
+					}
+					prevTime = current;
+				}
+
+				double zn[2][1] = {{kalmanReading}, {speeed}};
+				kalman(zn);
+					S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
+					if((motor_pos <= 200) && (motor_pos >= 45) && x[0][0] > 100 && x[0][0] > posPrev){
+						flag3 = 1;
+						posPrev = x[0][0];
+						MotorPID(((U32)x[0][0]), NXT_PORT_A);
+					}
+					else
+						nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+			prevKalman = kalmanReading;
             }
 
-            double zn[2][1] = {{kalmanReading}, {speeed}};
-            kalman(zn);
-                S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-                if((motor_pos <= 200) && (motor_pos >= 45) &&  flag2){
-                	flag3 = 1;
-                    MotorPID(((U32)x[0][0]), NXT_PORT_A);
-                }
-                else
-                    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-        }
        
         TerminateTask();
     }

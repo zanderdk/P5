@@ -31,8 +31,8 @@
     	*lastError = error;
 
     	return (speed > 0) ?
-            (S32)(speed + 65) :
+            (S32)(speed + 75) :
             (speed < 0) ?
-               (S32)(speed - 65) :
+               (S32)(speed - 75) :
                 (S32)speed;
     }
