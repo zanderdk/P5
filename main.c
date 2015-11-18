@@ -48,7 +48,8 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 double kalmanReading = 0;
 S8 speed = 0;
-double x[2][1] = {{100.0},{0.0}};
+double speeed = 0.0;
+double x[2][1] = {{75.0},{0.0}};
 double xm[2][1] = {{100.0},{0.0}};
 long double deter = 100.0;
 static S8 flag3 = 0;
@@ -160,7 +161,6 @@ static S8 flag3 = 0;
         matrixMultiplikation(2,2,2,2, P, aT, P);
 
         matrixMultiplikation(2, 2, 2, 1, am, x, xm);
-        xm[0][0] += 20.0; 
 
         prev_time = current;
     }
@@ -196,14 +196,20 @@ static S8 flag3 = 0;
     TASK(Task2)
     {   
         static S8 prev = UNKNOWN;
+
         S8 flag = 0;
+        static S8 flag4 = 0;
         static S8 flag2 = 0;
+        static double prevKalman = 0.0;
+        static double prevTime = 0.0;
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
+
 
         if(left < RANGE_CLOSE && right < RANGE_CLOSE){
             prev = CENTER;
             flag2 = 1;
+            prevTime = systick_get_ms();
         }
         else if(left < RANGE_FAR)
             prev = LEFT_2;
@@ -233,24 +239,38 @@ static S8 flag3 = 0;
         else if(prev == RIGHT_3)
             kalmanReading = 18.94;
         else if(prev == LEFT_4)
-            kalmanReading = -30;
+            kalmanReading = -50;
         else if(prev == RIGHT_4)
-            kalmanReading = 30;
+            kalmanReading = 50;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
             flag = 1;
         }
         else kalmanReading = (((double)prev) * 5.418);
         
+        if(kalmanReading > 0 && !flag4)
+        	flag4 = 1;
 
-        if(!flag){
+        if(!flag && flag4){
             kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
-            double zn[2][1] = {{kalmanReading}, {13}};
+
+            if(kalmanReading != prevKalman && flag4)
+            {
+            	double current = (((double)systick_get_ms())/1000);
+            	double sp = speeed;
+            	speeed = (kalmanReading - prevKalman)/(current - prevTime);
+            	if(!(speeed < 70.0 && speeed > 2.0))
+            		speeed = sp;
+            	prevTime = current;
+            	prevKalman = kalmanReading;
+            }
+
+            double zn[2][1] = {{kalmanReading}, {speeed}};
             kalman(zn);
                 S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-                if((motor_pos <= 200) && (motor_pos >= 45) && ((S32)xm[0][0]) > 100 && flag2){
+                if((motor_pos <= 200) && (motor_pos >= 45) &&  flag2){
                 	flag3 = 1;
-                    MotorPID(((U32)xm[0][0]), NXT_PORT_A);
+                    MotorPID(((U32)x[0][0]), NXT_PORT_A);
                 }
                 else
                     nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -272,10 +292,10 @@ static S8 flag3 = 0;
         while(1){
             display_clear(1);
             display_goto_xy(0,0);
-            display_int((S32)xm[0][0], 7);
+            display_int((S32)x[0][0], 7);
 
             display_goto_xy(0,1);
-            display_int(((S32)deter), 7);
+            display_int(((S32)speeed), 7);
             display_update();
             
             display_goto_xy(0,2);
