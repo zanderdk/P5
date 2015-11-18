@@ -31,8 +31,8 @@
     	*lastError = error;
 
     	return (speed > 0) ?
-            (S32)(speed + 80) :
+            (S32)(speed + MotorStartPower) :
             (speed < 0) ?
-               (S32)(speed - 80) :
+               (S32)(speed - MotorStartPower) :
                 (S32)speed;
     }
