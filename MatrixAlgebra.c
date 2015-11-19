@@ -30,6 +30,23 @@ void matrixAddition(S32 row, S32 columns, double firstMatrix[row][columns], doub
 	}
 }
 
+void matrixSubtraction(S32 row, S32 columns, double firstMatrix[row][columns], double secondMatrix[row][columns], double rtnMatrix[row][columns])
+{
+	double firstMatrixTmp[row][columns];
+	double secondMatrixTmp[row][columns];
+	matrixCopy(row, columns, firstMatrixTmp, firstMatrix);
+	matrixCopy(row, columns, secondMatrixTmp, secondMatrix);
+	S32 i = 0;
+	S32 j = 0;
+	for(i=0; i<row; i++)
+	{
+		for(j=0; j<columns; j++)
+		{
+			rtnMatrix[i][j] = firstMatrixTmp[i][j] - secondMatrixTmp[i][j];
+		}
+	}
+}
+
 void skalarMultiplikation(S32 row, S32 columns, double matrix[row][columns], double multiplier, double rtnMatrix[row][columns])
 {
 		double matrixTmp[row][columns];

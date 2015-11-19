@@ -11,6 +11,7 @@ void matrixCopy(S32 row, S32 columns, double [row][columns], double [row][column
 void matrixAddition(S32 row, S32 columns, double [row][columns], double [row][columns], double [row][columns]);
 void skalarMultiplikation(S32 row, S32 columns, double [row][columns], double multiplier, double [row][columns]);
 U8 matrixMultiplikation(S32 rowFirst, S32 columnsFirst, S32 rowSecond, S32 columnsSecond, double [rowFirst][columnsFirst], double [rowSecond][columnsSecond], double [rowFirst][columnsSecond]);
+void matrixSubtraction(S32 row, S32 columns, double [row][columns], double [row][columns], double [row][columns]);
 void matrixTranspose(S32 row, S32 columns, double [row][columns], double [row][columns]);
 U8 matrixInvers(S32 row, S32 columns, double [columns][row], double [columns][row]);
 long double matrixDeterminant(S32 row, S32 columns, double matrix[row][columns]);
