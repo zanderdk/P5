@@ -37,7 +37,7 @@
 #define LEFT_SENSOR NXT_PORT_S1
 #define RIGHT_SENSOR NXT_PORT_S2
 
-#define VK 2.0
+#define VK 8.0
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
@@ -46,8 +46,9 @@ DeclareTask(Task3);
 
 U32 WSRotation = 0;
 double kalmanReading = 0;
-double x[2][1] = {{87.0},{0.0}};
+double x[2][1] = {{-40.0},{30.0}};
 static S8 flag3 = 0;
+static S8 flag2 = 0;
 
 
     /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -111,11 +112,9 @@ static S8 flag3 = 0;
         /* Kalman konstanter og */
 
         static double R = VK*VK;
-        static double prev_time = 0.0;
         static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-        static double P[2][2] = {{1.0,0.0},{0.0,1.0}};
-        double current = (double)systick_get_ms();
-        double t = (prev_time == 0)? 0.01 : (current-prev_time)/1000.0;
+        static double P[2][2] = {{0.4,0.0},{0.0,100.0}};
+        double t = 0.01;
         double h[1][2] = {{1.0, 0.0}};
         double hT[2][1] = {{1.0},{0.0}};
         double a[2][2] = {{1.0, t},{0.0, 1.0}};
@@ -151,8 +150,6 @@ static S8 flag3 = 0;
  		matrixMultiplikation(2,2,2,1, a, x, x);
  		matrixMultiplikation(2,2,2,2, a, P, P);
  		matrixMultiplikation(2,2,2,2, P, aT, P);
-
-        prev_time = current;
     }
 
     S8 naive_speed(S8 reading){
@@ -186,9 +183,10 @@ static S8 flag3 = 0;
     TASK(Task2)
     {   
         static S8 prev = UNKNOWN;
+        static S8 counter = 0;
 
         S8 flag = 0;
-        static S8 flag2 = 0;
+
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
@@ -204,7 +202,7 @@ static S8 flag3 = 0;
                 prev = LEFT_3;
             else {
             	prev = LEFT_1;
-            	flag2 = 1;
+            	//flag2 = 1;
             }
         }
         else if(right < RANGE_FAR)
@@ -212,7 +210,10 @@ static S8 flag3 = 0;
         else if(right < RANGE_CLOSE){
             if(prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
                 prev = RIGHT_3;
-            else prev = RIGHT_1;
+            else { 
+                prev = RIGHT_1;
+                flag2 = 1;
+            }
         }
         else if(prev < 0)
             prev = LEFT_4;
@@ -220,15 +221,14 @@ static S8 flag3 = 0;
             prev = RIGHT_4;
         else prev = UNKNOWN;
 
-        if(prev == LEFT_3){
+        if(prev == LEFT_3 || prev == LEFT_2)
             kalmanReading = -13.1705;
-        }
-        else if(prev == RIGHT_3)
+        else if(prev == RIGHT_3 || prev == RIGHT_2)
             kalmanReading = 18.94;
         else if(prev == LEFT_4)
-            kalmanReading = -30;
+            kalmanReading = -13.1705;
         else if(prev == RIGHT_4)
-            kalmanReading = 30;
+            kalmanReading = 30.0;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
             flag = 1;
@@ -237,12 +237,18 @@ static S8 flag3 = 0;
         	kalmanReading = (((double)prev) * 5.418);
         }
 
-        if(!flag){
+        if(counter < 3 && prev != UNKNOWN)
+        {
+            counter++;
+            prev = UNKNOWN;
+        }
+
+        else if(!flag){
             kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
 				kalman(kalmanReading);
 					S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-					if((motor_pos <= 200) && (motor_pos >= 45) && x[0][0] > 100){
+					if((motor_pos <= 100) && (motor_pos >= -45) ){
 						flag3 = 1;
 						MotorPID(((U32)x[0][0]), NXT_PORT_A);
 					}
@@ -262,7 +268,6 @@ static S8 flag3 = 0;
     TASK(Task1)
     {
 
-       nxt_motor_set_count(NXT_PORT_A, 100);
         
         while(1){
             display_clear(1);
@@ -270,13 +275,13 @@ static S8 flag3 = 0;
             display_int((S32)x[0][0], 7);
 
             display_goto_xy(0,1);
-            display_int(((S32)0), 7);
+            display_int((S32)x[1][0], 7);
             display_update();
             
             display_goto_xy(0,2);
             display_string("Speed:");
             display_goto_xy(0,3);
-            display_int(((S32)x[0][1] * 10), 7);
+            display_int((S32)flag2, 7);
             display_update();
 
             static S32 shots = 0;
@@ -286,7 +291,7 @@ static S8 flag3 = 0;
             		shots = fire();
         		}
             }
-            systick_wait_ms(50);
+            systick_wait_ms(100);
         }
       
     }
