@@ -4,7 +4,7 @@
 #include "ecrobot_private.h"
 #include "ecrobot_interface.h"
 #include "dist_nx.h"
-#include "MatrixAlgebra.h"
+#include "matrix_algebra.h"
 #include "PID.h"
 #include "weapon_system.h"
 
@@ -98,28 +98,28 @@ void kalman(double zn)
     double temp3[2][2] = {{0.0, 0.0},{0.0, 0.0}};
 
     /* Calculate kalman gain in K */
-    matrixMultiplikation(1,2,2,2, h, P, temp);
-	matrixMultiplikation(1,2,2,1, temp, hT, temp2);
+    matrixMultiply(1,2,2,2, h, P, temp);
+	matrixMultiply(1,2,2,1, temp, hT, temp2);
 	temp2v += R;
 	temp2v = 1.0 / temp2v;
-	matrixMultiplikation(2,2,2,1, P, hT, K);
-	skalarMultiplikation(2,1, K, temp2v, K);
+	matrixMultiply(2,2,2,1, P, hT, K);
+	matrixScale(2,1, K, temp2v, K);
 
 	/* Update state estimate */
-	matrixMultiplikation(1,2,2,1, h, x, temp2);
+	matrixMultiply(1,2,2,1, h, x, temp2);
 	zn -= temp2v;
-	skalarMultiplikation(2,1, K, zn, y);
-	matrixAddition(2,1, x, y, x);
+	matrixScale(2,1, K, zn, y);
+	matrixAdd(2,1, x, y, x);
 
 	/* Update state covariance */
-	matrixMultiplikation(2,1,1,2, K, h, temp3);
-	matrixSubtraction(2,2, I, temp3, temp3);
-	matrixMultiplikation(2,2,2,2, temp3, P, P);
+	matrixMultiply(2,1,1,2, K, h, temp3);
+	matrixSubtract(2,2, I, temp3, temp3);
+	matrixMultiply(2,2,2,2, temp3, P, P);
 
 	/* Project into timestep k+1 */
-	matrixMultiplikation(2,2,2,1, a, x, x);
-	matrixMultiplikation(2,2,2,2, a, P, P);
-	matrixMultiplikation(2,2,2,2, P, aT, P);
+	matrixMultiply(2,2,2,1, a, x, x);
+	matrixMultiply(2,2,2,2, a, P, P);
+	matrixMultiply(2,2,2,2, P, aT, P);
 }
 
 TASK(Task3)

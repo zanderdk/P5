@@ -8,7 +8,7 @@ TARGET_SOURCES = \
 	PIDTarget.c \
 	dist_nx_v3.c \
 	tracking.c \
-	MatrixAlgebra.c
+	matrix_algebra.c
 	
 TOPPERS_OSEK_OIL_SOURCE = ./main.oil
 
