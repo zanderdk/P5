@@ -49,6 +49,7 @@ double kalmanReading = 0;
 double x[2][1] = {{-40.0},{50.0}};
 static S8 flag3 = 0;
 static S8 flag2 = 0;
+long double determinant = 0;
 
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -90,7 +91,7 @@ void kalman(double zn)
     double hT[2][1] = {{1.0},{0.0}};
     double a[2][2] = {{1.0, t},{0.0, 1.0}};
     double aT[2][2] = {{1.0,0.0},{t,1.0}}; 
-    double K[2][1] = {{0.0},{0.0}};
+	double K[2][1] = {{0.0},{0.0}};
     double y[2][1] = {{0.0},{0.0}};
     double temp[1][2] = {{0.0, 0.0}};
     double temp2v = 0.0;
@@ -120,6 +121,7 @@ void kalman(double zn)
 	matrixMultiply(2,2,2,1, a, x, x);
 	matrixMultiply(2,2,2,2, a, P, P);
 	matrixMultiply(2,2,2,2, P, aT, P);
+    determinant = matrixDeterminant(2, 2, P) * 10000.0;
 }
 
 TASK(Task3)
@@ -225,15 +227,16 @@ TASK(Task1)
         display_update();
         
         display_goto_xy(0,2);
-        display_string("Speed:");
+        display_string("P determinant:");
         display_goto_xy(0,3);
-        display_int((S32)flag2, 7);
+        display_int((S32)determinant, 7);
+
         display_update();
 
         static S32 shots = 0;
         if(flag3){
         	cock();
-    		if(motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 150){
+    		if(determinant < 10 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
         		shots = fire();
     		}
         }
