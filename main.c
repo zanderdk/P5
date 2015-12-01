@@ -45,17 +45,18 @@ DeclareTask(Task2);
 DeclareTask(Task3);
 
 U32 WSRotation = 0;
+S8 resetRot = 0;
 double kalmanReading = 0;
 double x[2][1] = {{-40.0},{50.0}};
 S8 flag3 = 0;
 S8 flag2 = 0;
 S8 prev = UNKNOWN;
 S8 counter = 0;
+S32 shots = 0;
 U8 enableTask2 = 0;
 long double determinant = 0;
 double P[2][2] = {{0.4,0.0},{0.0,30.0}};
 U8 resetCounter = 0;
-U8 speed = 0;
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
 void user_1ms_isr_type2(void)
@@ -67,6 +68,35 @@ void user_1ms_isr_type2(void)
 	{
 	   ShutdownOS(ercd);
 	}
+}
+
+void reset()
+{
+    kalmanReading = 0;
+    x[0][0] = -40.0;
+    x[1][0] = 50.0;
+    flag3 = 0;
+    flag2 = 0;
+    prev = UNKNOWN;
+    counter = 0;
+    enableTask2 = 0;
+    determinant = 0;
+    shots = 0;
+    P[0][0] = 0.4;
+    P[0][1] = 0.0;
+    P[1][0] = 0.0;
+    P[1][1] = 30.0;
+    nxt_motor_set_count(NXT_PORT_A, 0);
+}
+
+void resetTowerTo(S32 pos)
+{
+    U32 start = systick_get_ms();
+    while(start + 1500 > systick_get_ms()){
+        MotorPID(pos, NXT_PORT_A, 0);
+    }
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    systick_wait_ms(500);
 }
 
 void ecrobot_device_initialize(void)
@@ -139,7 +169,7 @@ TASK(Task2)
 {   
     if(enableTask2)
     {
-        S8 flag = 0;
+        S8 flag = 1;
 
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
@@ -188,7 +218,7 @@ TASK(Task2)
             kalmanReading = 30.0;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
-            flag = 1;
+            flag = 0;
         }
         else {
         	kalmanReading = (((double)prev) * 5.418);
@@ -200,14 +230,14 @@ TASK(Task2)
             prev = UNKNOWN;
         }
 
-        else if(!flag){
+        else if(flag){
             kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
     			kalman(kalmanReading);
 				S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 				if((motor_pos <= 100) && (motor_pos >= -45) ){
 					flag3 = 1;
-					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/20), NXT_PORT_A, 1);
+					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
 				}
 				else
 					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -223,23 +253,25 @@ int motor_in_range(int range){
 
 TASK(Task1)
 {   
-    U32 start = systick_get_ms();
-    while(start + 1000 > systick_get_ms()){
-        MotorPID(-30, NXT_PORT_A, 0);
-    }
-    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-    systick_wait_ms(500);
-    nxt_motor_set_count(NXT_PORT_A, 0);
+    resetTowerTo(-30);
+    reset();
     enableTask2 = 1;
 
     while(1){
         if(resetCounter == 6)
         {
-            resetCounter = 0;
-            nxt_motor_set_count(NXT_PORT_A, 0);
             enableTask2 = 0;
             flag3 = 0;
             WSRotation -= 150;
+            resetTowerTo(0 - resetRot);
+            resetRot += nxt_motor_get_count(NXT_PORT_A);
+            
+        }
+        if(resetCounter == 12)
+        {
+            resetCounter = 0;
+            reset();
+            enableTask2 = 1;
         }
 
         display_clear(1);
@@ -253,11 +285,10 @@ TASK(Task1)
         display_goto_xy(0,2);
         display_string("P determinant:");
         display_goto_xy(0,3);
-        display_int((S32)WSRotation, 7);
+        display_int((S32)nxt_motor_get_count(NXT_PORT_A), 7);
 
         display_update();
 
-        static S32 shots = 0;
         if(flag3){
         	cock();
     		if(nxt_motor_get_count(NXT_PORT_A) > 50 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
