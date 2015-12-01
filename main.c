@@ -101,12 +101,14 @@ void resetTowerTo(S32 pos)
 
 void ecrobot_device_initialize(void)
 {
+    ecrobot_init_bt_slave("1234");
     ecrobot_init_dist_sensor(NXT_PORT_S1, RANGE_MEDIUM, 1);
     ecrobot_init_dist_sensor(NXT_PORT_S2, RANGE_MEDIUM, 0);
 }
 
 void ecrobot_device_terminate(void)
 {
+    ecrobot_term_bt_connection();
 	ecrobot_term_dist_sensor(NXT_PORT_S1);
 	ecrobot_term_dist_sensor(NXT_PORT_S2);
     nxt_motor_set_speed(NXT_PORT_A,0,1);
@@ -251,6 +253,18 @@ int motor_in_range(int range){
             nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
 }
 
+void bt_data_logger(void)
+{
+    static U8 data_log_buffer[16];
+
+    *((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
+    *((S32 *)(&data_log_buffer[4]))  = (S32)nxt_motor_get_count(NXT_PORT_A);
+    *((S32 *)(&data_log_buffer[8]))  = (S32)determinant;
+    *((S32 *)(&data_log_buffer[12]))  = (S32)x[1][0];
+        
+    ecrobot_send_bt(data_log_buffer, 0, 16);
+}
+
 TASK(Task1)
 {   
     resetTowerTo(-30);
@@ -286,7 +300,7 @@ TASK(Task1)
         display_string("P determinant:");
         display_goto_xy(0,3);
         display_int((S32)determinant, 7);
-
+        bt_data_logger();
         display_update();
 
         if(flag3){
