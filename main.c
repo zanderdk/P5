@@ -47,10 +47,15 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 double kalmanReading = 0;
 double x[2][1] = {{-40.0},{50.0}};
-static S8 flag3 = 0;
-static S8 flag2 = 0;
+S8 flag3 = 0;
+S8 flag2 = 0;
+S8 prev = UNKNOWN;
+S8 counter = 0;
+U8 enableTask2 = 0;
 long double determinant = 0;
-
+double P[2][2] = {{0.4,0.0},{0.0,30.0}};
+U8 resetCounter = 0;
+U8 speed = 0;
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
 void user_1ms_isr_type2(void)
@@ -60,7 +65,7 @@ void user_1ms_isr_type2(void)
 	ercd = SignalCounter(SysTimerCnt); /* Increment OSEK Alarm Counter */
 	if (ercd != E_OK)
 	{
-	ShutdownOS(ercd);
+	   ShutdownOS(ercd);
 	}
 }
 
@@ -85,7 +90,6 @@ void kalman(double zn)
     /* Constants and matrices used for kalman calculations */
     static double R = VK;
     static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-    static double P[2][2] = {{0.4,0.0},{0.0,30.0}};
     double t = 0.01;
     double h[1][2] = {{1.0, 0.0}};
     double hT[2][1] = {{1.0},{0.0}};
@@ -126,87 +130,89 @@ void kalman(double zn)
 
 TASK(Task3)
 {
-	MotorPID(WSRotation,WSMOTOR1);
-	MotorPID(WSRotation,WSMOTOR2);
+	MotorPID(WSRotation,WSMOTOR1, 0);
+	MotorPID(WSRotation,WSMOTOR2, 0);
     TerminateTask();
 }
 
 TASK(Task2)
 {   
-    static S8 prev = UNKNOWN;
-    static S8 counter = 0;
+    if(enableTask2)
+    {
+        S8 flag = 0;
 
-    S8 flag = 0;
-
-    S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
-    S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
+        S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
+        S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
 
-    if(left < RANGE_CLOSE && right < RANGE_CLOSE){
-        prev = CENTER;
-        flag2 = 1;
-    }
-    else if(left < RANGE_FAR)
-        prev = LEFT_2;
-    else if(left < RANGE_CLOSE){
-        if(prev == UNKNOWN || prev == LEFT_4 || prev == LEFT_3)
-            prev = LEFT_3;
-        else {
-        	prev = LEFT_1;
-        	//flag2 = 1;
-        }
-    }
-    else if(right < RANGE_FAR)
-        prev = RIGHT_2;
-    else if(right < RANGE_CLOSE){
-        if(prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
-            prev = RIGHT_3;
-        else { 
-            prev = RIGHT_1;
+        if(left < RANGE_CLOSE && right < RANGE_CLOSE){
+            prev = CENTER;
             flag2 = 1;
         }
-    }
-    else if(prev < 0)
-        prev = LEFT_4;
-    else if(prev > 0 && prev != UNKNOWN)
-        prev = RIGHT_4;
-    else prev = UNKNOWN;
+        else if(left < RANGE_FAR)
+            prev = LEFT_2;
+        else if(left < RANGE_CLOSE){
+            if(prev == UNKNOWN || prev == LEFT_4 || prev == LEFT_3)
+                prev = LEFT_3;
+            else {
+            	prev = LEFT_1;
+            	//flag2 = 1;
+            }
+        }
+        else if(right < RANGE_FAR)
+            prev = RIGHT_2;
+        else if(right < RANGE_CLOSE){
+            if(prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
+                prev = RIGHT_3;
+            else { 
+                prev = RIGHT_1;
+                flag2 = 1;
+            }
+        }
+        else if(prev < 0)
+            prev = LEFT_4;
+        else if(prev > 0 && prev != UNKNOWN)
+            prev = RIGHT_4;
+        else {
+            prev = UNKNOWN;
+            counter = 0;
+        }
 
-    if(prev == LEFT_3 || prev == LEFT_2)
-        kalmanReading = -13.1705;
-    else if(prev == RIGHT_3 || prev == RIGHT_2)
-        kalmanReading = 18.94;
-    else if(prev == LEFT_4)
-        kalmanReading = -13.1705;
-    else if(prev == RIGHT_4)
-        kalmanReading = 30.0;
-    else if(prev == UNKNOWN){
-        nxt_motor_set_speed(NXT_PORT_A, 0, 0);
-        flag = 1;
-    }
-    else {
-    	kalmanReading = (((double)prev) * 5.418);
-    }
+        if(prev == LEFT_3 || prev == LEFT_2)
+            kalmanReading = -13.1705;
+        else if(prev == RIGHT_3 || prev == RIGHT_2)
+            kalmanReading = 18.94;
+        else if(prev == LEFT_4)
+            kalmanReading = -13.1705;
+        else if(prev == RIGHT_4)
+            kalmanReading = 30.0;
+        else if(prev == UNKNOWN){
+            nxt_motor_set_speed(NXT_PORT_A, 0, 0);
+            flag = 1;
+        }
+        else {
+        	kalmanReading = (((double)prev) * 5.418);
+        }
 
-    if(counter < 3 && prev != UNKNOWN)
-    {
-        counter++;
-        prev = UNKNOWN;
-    }
+        if(counter < 10 && prev != UNKNOWN)
+        {
+            counter++;
+            prev = UNKNOWN;
+        }
 
-    else if(!flag){
-        kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
+        else if(!flag){
+            kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
 
-			kalman(kalmanReading);
+    			kalman(kalmanReading);
 				S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 				if((motor_pos <= 100) && (motor_pos >= -45) ){
 					flag3 = 1;
-					MotorPID(((U32)x[0][0]), NXT_PORT_A);
+					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/20), NXT_PORT_A, 1);
 				}
 				else
 					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-        }
-
+            }
+    }
     TerminateTask();
 }
 
@@ -217,7 +223,25 @@ int motor_in_range(int range){
 
 TASK(Task1)
 {   
+    U32 start = systick_get_ms();
+    while(start + 1000 > systick_get_ms()){
+        MotorPID(-30, NXT_PORT_A, 0);
+    }
+    nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+    systick_wait_ms(500);
+    nxt_motor_set_count(NXT_PORT_A, 0);
+    enableTask2 = 1;
+
     while(1){
+        if(resetCounter == 6)
+        {
+            resetCounter = 0;
+            nxt_motor_set_count(NXT_PORT_A, 0);
+            enableTask2 = 0;
+            flag3 = 0;
+            WSRotation -= 150;
+        }
+
         display_clear(1);
         display_goto_xy(0,0);
         display_int((S32)x[0][0], 7);
@@ -229,16 +253,21 @@ TASK(Task1)
         display_goto_xy(0,2);
         display_string("P determinant:");
         display_goto_xy(0,3);
-        display_int((S32)determinant, 7);
+        display_int((S32)WSRotation, 7);
 
         display_update();
 
         static S32 shots = 0;
         if(flag3){
         	cock();
-    		if(determinant < 10 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
+    		if(nxt_motor_get_count(NXT_PORT_A) > 50 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
         		shots = fire();
+                resetCounter = 1;
     		}
+        }
+        if(resetCounter > 0)
+        {
+            resetCounter++;
         }
         systick_wait_ms(100);
     }

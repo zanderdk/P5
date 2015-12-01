@@ -2,8 +2,9 @@
 #include "PID.h"
 
     S32 
-    MotorPID(S32 target, U8 motor)
+    MotorPID(S32 target, U8 motor, U8 flag)
     {
+        static S32 getSpeed = 0;
         static S32 integrale[] = {0, 0, 0, 0};
         static S32 lastError[] = {0, 0, 0, 0};
         static S32 lastTarget[] = {0, 0, 0, 0};
@@ -15,9 +16,16 @@
         	lastTarget[motor] = target;
         }
 
-    	register S32 current = nxt_motor_get_count(motor);
-    	register S32 getSpeed = PID(target, current, &integrale[motor], &lastError[motor]);
-    	nxt_motor_set_speed(motor, getSpeed, 0);
+    	S32 current = nxt_motor_get_count(motor);
+        if( flag || !((getSpeed <= 80 && getSpeed >= -80) && (current - target) <= 4 && (current - target) >= -4)){
+    	   getSpeed = PID(target, current, &integrale[motor], &lastError[motor]);
+    	   nxt_motor_set_speed(motor, getSpeed, (!getSpeed));
+
+        }
+        else 
+        {
+            nxt_motor_set_speed(motor, 0, 1);
+        }
     	return getSpeed;
     }
 

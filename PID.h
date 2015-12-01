@@ -7,4 +7,4 @@
 #define Ki 0.0000000075     // Ki
 #define MotorStartPower 80
 extern S32 PID(S32, S32, S32*, S32*);
-extern S32 MotorPID(S32, U8);
+extern S32 MotorPID(S32 target, U8 motor, U8 flag);

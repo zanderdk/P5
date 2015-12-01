@@ -1,8 +1,8 @@
 #include "PID.h"
 #include "ecrobot_interface.h"
 
-static S32 shotsfired = 0;
-extern S32 WSRotation;
+static U32 shotsfired = 0;
+extern U32 WSRotation;
 
 /*void cock(U8 motor1, U8 motor2){
 	S32 cAngle = shotsfired * 300 + 227;
@@ -25,12 +25,13 @@ S32 fire(U8 motor1, U8 motor2){
 
 void cock()
 {
-	WSRotation = shotsfired * 300 + 175;
+	WSRotation = shotsfired * 300 + 150;
 }
 
 
 S32 fire()
 {
-	WSRotation = shotsfired * 300 + 175;
-	return ++shotsfired;
+	++shotsfired;
+	WSRotation = shotsfired * 300 + 150;
+	return shotsfired;
 }
