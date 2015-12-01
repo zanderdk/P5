@@ -237,7 +237,7 @@ TASK(Task2)
 				S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 				if((motor_pos <= 100) && (motor_pos >= -45) ){
 					flag3 = 1;
-					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
+					MotorPID(((U32)x[0][0]) + ((1.0/determinant)*1.0)*(x[1][0]/1.0), NXT_PORT_A, 1);
 				}
 				else
 					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -285,13 +285,13 @@ TASK(Task1)
         display_goto_xy(0,2);
         display_string("P determinant:");
         display_goto_xy(0,3);
-        display_int((S32)nxt_motor_get_count(NXT_PORT_A), 7);
+        display_int((S32)determinant, 7);
 
         display_update();
 
         if(flag3){
         	cock();
-    		if(nxt_motor_get_count(NXT_PORT_A) > 50 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
+    		if(motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
         		shots = fire();
                 resetCounter = 1;
     		}
