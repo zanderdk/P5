@@ -47,7 +47,7 @@ DeclareTask(Task3);
 U32 WSRotation = 0;
 S8 resetRot = 0;
 double kalmanReading = 0;
-double x[2][1] = {{-40.0},{50.0}};
+double x[2][1] = {{-40.0},{70.0}};
 S8 flag3 = 0;
 S8 flag2 = 0;
 S8 prev = UNKNOWN;
@@ -57,6 +57,7 @@ U8 enableTask2 = 0;
 long double determinant = 0;
 double P[2][2] = {{0.4,0.0},{0.0,30.0}};
 U8 resetCounter = 0;
+U32 last = 0;
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
 void user_1ms_isr_type2(void)
@@ -74,7 +75,7 @@ void reset()
 {
     kalmanReading = 0;
     x[0][0] = -40.0;
-    x[1][0] = 50.0;
+    x[1][0] = 70.0;
     flag3 = 0;
     flag2 = 0;
     prev = UNKNOWN;
@@ -82,6 +83,7 @@ void reset()
     enableTask2 = 0;
     determinant = 0;
     shots = 0;
+    last = 0;
     P[0][0] = 0.4;
     P[0][1] = 0.0;
     P[1][0] = 0.0;
@@ -112,7 +114,6 @@ void ecrobot_device_terminate(void)
     nxt_motor_set_speed(NXT_PORT_A,0,1);
     nxt_motor_set_speed(NXT_PORT_B,0,1);
     nxt_motor_set_speed(NXT_PORT_C,0,1);
-
 }
 
 void kalman(double zn)
@@ -120,7 +121,9 @@ void kalman(double zn)
     /* Constants and matrices used for kalman calculations */
     static double R = VK;
     static double I[2][2] = {{1.0,0.0},{0.0,1.0}}; 
-    double t = 0.01;
+    U32 current = systick_get_ms();
+    double t = (last == 0)? 0.1 : (double)(current-last)/1000.0;
+    last = current;
     double h[1][2] = {{1.0, 0.0}};
     double hT[2][1] = {{1.0},{0.0}};
     double a[2][2] = {{1.0, t},{0.0, 1.0}};
@@ -208,21 +211,29 @@ TASK(Task2)
             counter = 0;
         }
 
-        if(prev == LEFT_3 || prev == LEFT_2)
-            kalmanReading = -13.1705;
+       if(prev == LEFT_3 || prev == LEFT_2)
+            kalmanReading = -17.37;
         else if(prev == RIGHT_3 || prev == RIGHT_2)
-            kalmanReading = 18.94;
+            kalmanReading = 20.74;
         else if(prev == LEFT_4)
-            kalmanReading = -13.1705;
+            kalmanReading = -17.37;
         else if(prev == RIGHT_4)
             kalmanReading = 30.0;
         else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
             flag = 0;
         }
-        else {
-        	kalmanReading = (((double)prev) * 5.418);
+        else if(prev == CENTER)
+        {
+            kalmanReading = 1.058;
         }
+        else if(prev == LEFT_1) {
+            kalmanReading = -7.52;
+        }
+        else{
+            kalmanReading = 9.78;
+        }
+ 
 
         if(counter < 10 && prev != UNKNOWN)
         {
@@ -237,7 +248,7 @@ TASK(Task2)
 				S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
 				if((motor_pos <= 100) && (motor_pos >= -45) ){
 					flag3 = 1;
-					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
+					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 0);
 				}
 				else
 					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -291,7 +302,7 @@ TASK(Task1)
 
         if(flag3){
         	cock();
-    		if(nxt_motor_get_count(NXT_PORT_A) > 50 && motor_in_range(10) && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
+    		if(nxt_motor_get_count(NXT_PORT_A) > 50 && !shots && nxt_motor_get_count(NXT_PORT_A) > 50){
         		shots = fire();
                 resetCounter = 1;
     		}
