@@ -225,8 +225,8 @@ TASK(Task2) {
             S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
             if ((motor_pos <= 100) && (motor_pos >= -45) ) {
                 targetSeenFlag = 1;
-                offset = ((U32)x[0][0]) + (1.0 / determinant) * (x[1][0] / 5);
-                MotorPID(offset, NXT_PORT_A, 0); //offset function
+                offset = ((U32)(x[0][0]) + (1.0 / determinant) * (x[1][0] / 5.0));
+                MotorPID((U32)(x[0][0]), NXT_PORT_A, 0); //offset function
             } else
                 nxt_motor_set_speed(NXT_PORT_A, 0, 1);
         }
@@ -259,26 +259,29 @@ TASK(Task1) {
             enableTask2Flag = 1;
         }
 
-        display_clear(1);
-        display_goto_xy(0, 0);
-        display_int((S32)x[0][0], 7);
-
-        display_goto_xy(0, 1);
-        display_int((S32)x[1][0], 7);
-        display_update();
-
-        display_goto_xy(0, 2);
-        display_string("P determinant:");
-        display_goto_xy(0, 3);
-        display_int((S32)nxt_motor_get_count(NXT_PORT_A), 7);
-
-        display_update();
-
         if (targetSeenFlag) {
             cock();
-            if (nxt_motor_get_count(NXT_PORT_A) > 40 && !shotFlag && motor_in_range(offset)) {
+            if (nxt_motor_get_count(NXT_PORT_A) > 45 && !shotFlag && motor_in_range(3)) {
                 shotFlag = fire();
                 resetCounter = 1;
+
+                display_clear(1);
+                display_goto_xy(0, 0);
+                display_int((S32)x[0][0], 7);
+
+                display_goto_xy(0, 1);
+                display_int((S32)x[1][0], 7);
+
+                display_goto_xy(0, 3);
+                display_int((int)(P[0][0] * 100), 7);
+                display_goto_xy(0, 4);
+                display_int((int)(P[1][1] * 100), 7);
+                display_goto_xy(0, 5);
+                display_int((int)(P[1][0] * 100), 7);
+                display_goto_xy(0, 6);
+                display_int((int)(P[0][1] * 100), 7);
+                display_update();
+
             }
         }
         if (resetCounter > 0) {
