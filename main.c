@@ -263,7 +263,7 @@ TASK(Task1)
 
         if(targetSeenFlag){
         	cock();
-    		if(-nxt_motor_get_count(NXT_PORT_A) > 50 && !shotFlag && motor_in_range(3)){
+    		if(-nxt_motor_get_count(NXT_PORT_A) > 40 && !shotFlag && motor_in_range(3)){
         		shotFlag = fire();
                 resetCounter = 1;
 
