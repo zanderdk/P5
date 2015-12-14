@@ -168,25 +168,25 @@ TASK(Task2) {
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
 
-        if (left < RANGE_CLOSE && right < RANGE_CLOSE) {
+        if (left < RANGE_CLOSE && right < RANGE_CLOSE)
             prev = CENTER;
-        } else if (left < RANGE_FAR)
+        else if (left < RANGE_FAR)
             prev = LEFT_2;
         else if (left < RANGE_CLOSE) {
             if (prev == UNKNOWN || prev == LEFT_4 || prev == LEFT_3)
                 prev = LEFT_3;
-            else {
+            else
                 prev = LEFT_1;
-            }
-        } else if (right < RANGE_FAR)
+        } 
+        else if (right < RANGE_FAR)
             prev = RIGHT_2;
         else if (right < RANGE_CLOSE) {
             if (prev == UNKNOWN || prev == RIGHT_4 || prev == RIGHT_3)
                 prev = RIGHT_3;
-            else {
+            else
                 prev = RIGHT_1;
-            }
-        } else if (prev < 0)
+        } 
+        else if (prev < 0)
             prev = LEFT_4;
         else if (prev > 0 && prev != UNKNOWN)
             prev = RIGHT_4;
@@ -203,20 +203,14 @@ TASK(Task2) {
             kalmanReading = 17.37;
         else if(prev == RIGHT_4)
             kalmanReading = -30.0;
-        else if(prev == UNKNOWN){
+        else if(prev == UNKNOWN)
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
-            flag = 0;
-        }
         else if(prev == CENTER)
-        {
             kalmanReading = -1.058;
-        }
-        else if(prev == LEFT_1) {
+        else if(prev == LEFT_1)
             kalmanReading = 7.52;
-        }
-        else{
+        else
             kalmanReading = -9.78;
-        }
  
 
 
@@ -225,18 +219,18 @@ TASK(Task2) {
             prev = UNKNOWN;
         }
 
-        else if(flag){
+        else if(prev != UNKNOWN){
             kalmanReading += (double)(-nxt_motor_get_count(NXT_PORT_A));
 
-    			kalman(kalmanReading);
-				S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
-				if((motor_pos <= 100) && (motor_pos >= -45) ){
-					flag3 = 1;
-					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
-				}
-				else
-					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-            }
+			kalman(kalmanReading);
+			S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
+			if((motor_pos <= 100) && (motor_pos >= -45) ){
+				targetSeenFlag = 1;
+				MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
+			}
+			else
+				nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+        }
     }
     TerminateTask();
 }
@@ -259,34 +253,18 @@ TASK(Task1)
             WSRotation -= 150;
             resetTowerTo(0 - resetRot);
             resetRot -= -nxt_motor_get_count(NXT_PORT_A);
-            
         }
-        }
+
         if (resetCounter == 12) {
             resetCounter = 0;
             reset();
             enableTask2Flag = 1;
         }
 
-        display_clear(1);
-        display_goto_xy(0,0);
-        display_int((S32)x[0][0], 7);
-
-        display_goto_xy(0,1);
-        display_int((S32)x[1][0], 7);
-        display_update();
-        
-        display_goto_xy(0,2);
-        display_string("P determinant:");
-        display_goto_xy(0,3);
-        display_int((S32)-nxt_motor_get_count(NXT_PORT_A), 7);
-
-        display_update();
-
-        if(flag3){
+        if(targetSeenFlag){
         	cock();
-    		if(-nxt_motor_get_count(NXT_PORT_A) > 50 && !shots && -nxt_motor_get_count(NXT_PORT_A) > 50){
-        		shots = fire();
+    		if(-nxt_motor_get_count(NXT_PORT_A) > 50 && !shotFlag && motor_in_range(3)){
+        		shotFlag = fire();
                 resetCounter = 1;
 
                 display_clear(1);
@@ -305,12 +283,13 @@ TASK(Task1)
                 display_goto_xy(0, 6);
                 display_int((int)(P[0][1] * 100), 7);
                 display_update();
-
             }
         }
+
         if (resetCounter > 0) {
             resetCounter++;
         }
+
         systick_wait_ms(100);
     }
 }
