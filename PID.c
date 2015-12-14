@@ -17,10 +17,11 @@
         }
 
     	S32 current = nxt_motor_get_count(motor);
+        current = (flag)? -current : current;
         if( flag || !((getSpeed <= 80 && getSpeed >= -80) && (current - target) <= 4 && (current - target) >= -4)){
     	   getSpeed = PID(target, current, &integrale[motor], &lastError[motor]);
+           getSpeed = (flag)? -getSpeed : getSpeed;
     	   nxt_motor_set_speed(motor, getSpeed, (!getSpeed));
-
         }
         else 
         {

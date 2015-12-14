@@ -195,22 +195,29 @@ TASK(Task2) {
             counter = 0;
         }
 
-        if (prev == LEFT_3 || prev == LEFT_2)
-            kalmanReading = -17.37;
-        else if (prev == RIGHT_3 || prev == RIGHT_2)
-            kalmanReading = 20.74;
-        else if (prev == LEFT_4)
-            kalmanReading = -17.37;
-        else if (prev == RIGHT_4)
-            kalmanReading = 30.0;
-        else if (prev == CENTER)
-            kalmanReading = 1.058;
-        else if (prev == LEFT_1)
-            kalmanReading = -7.52;
-        else if (prev == RIGHT_1)
-            kalmanReading = 9.78;
-        else if (prev == UNKNOWN)
+       if(prev == LEFT_3 || prev == LEFT_2)
+            kalmanReading = 17.37;
+        else if(prev == RIGHT_3 || prev == RIGHT_2)
+            kalmanReading = -20.74;
+        else if(prev == LEFT_4)
+            kalmanReading = 17.37;
+        else if(prev == RIGHT_4)
+            kalmanReading = -30.0;
+        else if(prev == UNKNOWN){
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
+            flag = 0;
+        }
+        else if(prev == CENTER)
+        {
+            kalmanReading = -1.058;
+        }
+        else if(prev == LEFT_1) {
+            kalmanReading = 7.52;
+        }
+        else{
+            kalmanReading = -9.78;
+        }
+ 
 
 
         if (counter < 10 && prev != UNKNOWN) {
@@ -218,29 +225,30 @@ TASK(Task2) {
             prev = UNKNOWN;
         }
 
-        else if (prev != UNKNOWN) {
-            kalmanReading += (double)nxt_motor_get_count(NXT_PORT_A);
+        else if(flag){
+            kalmanReading += (double)(-nxt_motor_get_count(NXT_PORT_A));
 
-            kalman(kalmanReading);
-            S32 motor_pos = nxt_motor_get_count(NXT_PORT_A);
-            if ((motor_pos <= 100) && (motor_pos >= -45) ) {
-                targetSeenFlag = 1;
-                offset = ((U32)(x[0][0]) + (1.0 / determinant) * (x[1][0] / 5.0));
-                MotorPID((U32)(x[0][0]), NXT_PORT_A, 0); //offset function
-            } else
-                nxt_motor_set_speed(NXT_PORT_A, 0, 1);
-        }
+    			kalman(kalmanReading);
+				S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
+				if((motor_pos <= 100) && (motor_pos >= -45) ){
+					flag3 = 1;
+					MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
+				}
+				else
+					nxt_motor_set_speed(NXT_PORT_A, 0, 1);
+            }
     }
     TerminateTask();
 }
 
-int motor_in_range(int range) {
-    return (nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0]) - range &&
-            nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
+int motor_in_range(int range){
+    return (-nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0]) - range &&
+            -nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
 }
 
-TASK(Task1) {
-    resetTowerTo(-30);
+TASK(Task1)
+{   
+    resetTowerTo(30);
     reset();
     enableTask2Flag = 1;
 
@@ -250,8 +258,9 @@ TASK(Task1) {
             targetSeenFlag = 0;
             WSRotation -= 150;
             resetTowerTo(0 - resetRot);
-            resetRot += nxt_motor_get_count(NXT_PORT_A);
-
+            resetRot -= -nxt_motor_get_count(NXT_PORT_A);
+            
+        }
         }
         if (resetCounter == 12) {
             resetCounter = 0;
@@ -259,10 +268,25 @@ TASK(Task1) {
             enableTask2Flag = 1;
         }
 
-        if (targetSeenFlag) {
-            cock();
-            if (nxt_motor_get_count(NXT_PORT_A) > 45 && !shotFlag && motor_in_range(3)) {
-                shotFlag = fire();
+        display_clear(1);
+        display_goto_xy(0,0);
+        display_int((S32)x[0][0], 7);
+
+        display_goto_xy(0,1);
+        display_int((S32)x[1][0], 7);
+        display_update();
+        
+        display_goto_xy(0,2);
+        display_string("P determinant:");
+        display_goto_xy(0,3);
+        display_int((S32)-nxt_motor_get_count(NXT_PORT_A), 7);
+
+        display_update();
+
+        if(flag3){
+        	cock();
+    		if(-nxt_motor_get_count(NXT_PORT_A) > 50 && !shots && -nxt_motor_get_count(NXT_PORT_A) > 50){
+        		shots = fire();
                 resetCounter = 1;
 
                 display_clear(1);
