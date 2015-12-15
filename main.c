@@ -226,7 +226,7 @@ TASK(Task2) {
 			S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
 			if((motor_pos <= 100) && (motor_pos >= -45) ){
 				targetSeenFlag = 1;
-				MotorPID(((U32)x[0][0]) + (1.0/determinant)*(x[1][0]/15), NXT_PORT_A, 1);
+				MotorPID(((U32)x[0][0]), NXT_PORT_A, 1);
 			}
 			else
 				nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -263,7 +263,7 @@ TASK(Task1)
 
         if(targetSeenFlag){
         	cock();
-    		if(-nxt_motor_get_count(NXT_PORT_A) > 40 && !shotFlag && motor_in_range(3)){
+    		if(-nxt_motor_get_count(NXT_PORT_A) > 30 && !shotFlag && motor_in_range(3)){
         		shotFlag = fire();
                 resetCounter = 1;
 
