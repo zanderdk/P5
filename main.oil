@@ -22,6 +22,16 @@
       TASK Task3
       {
         AUTOSTART = FALSE;
+        PRIORITY = 3; /* Smaller value means lower priority */
+        ACTIVATION = 1;
+        SCHEDULE = FULL;
+        STACKSIZE = 512; /* Stack size */
+      };
+
+      /* Definition of Task4 */
+      TASK Task4
+      {
+        AUTOSTART = FALSE;
         PRIORITY = 2; /* Smaller value means lower priority */
         ACTIVATION = 1;
         SCHEDULE = FULL;
@@ -88,4 +98,21 @@
       APPMODE = appmode1;
     };
   };
+
+  ALARM cyclic_alarm3
+  {
+    COUNTER = SysTimerCnt;
+    ACTION = ACTIVATETASK
+    {
+      TASK = Task4;
+    };
+    AUTOSTART = TRUE
+    {
+      ALARMTIME = 1;
+      CYCLETIME = 20; /* Task3 is executed every  x msec */
+      APPMODE = appmode1;
+    };
+  };
+
+
 };

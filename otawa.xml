@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wcet>
+<program name="/cygwin/nxtOSEK/project/P5/main_rxe.elf" project="cygwin">
+<task addr="2115488" checksum="6e90e9db" label="TaskMainTask3" name="TaskMainTask3" wcet="11075">
+<flowfacts>
+<flowfact addr="0x00205c34" kind="loop" limit="1" name="loop at 0x00205c34"/>
+<flowfact addr="0x00205c58" kind="loop" limit="1" name="loop at 0x00205c58"/>
+</flowfacts>
+<unresolved/>
+</task>
+<task addr="2115764" checksum="46e55a37" label="TaskMainTask4" name="TaskMainTask4" wcet="675">
+<flowfacts/>
+<unresolved/>
+</task>
+<task addr="2115524" checksum="9c05da00" label="TaskMainTask2" name="TaskMainTask2" wcet="22815">
+<flowfacts>
+<flowfact addr="matrixMultiply+0x174" kind="loop" limit="0" name="loop at matrixMultiply+0x174"/>
+<flowfact addr="matrixMultiply+0x148" kind="loop" limit="0" name="loop at matrixMultiply+0x148"/>
+<flowfact addr="matrixMultiply+0x11e" kind="loop" limit="0" name="loop at matrixMultiply+0x11e"/>
+<flowfact addr="matrixScale+0xba" kind="loop" limit="0" name="loop at matrixScale+0xba"/>
+<flowfact addr="matrixScale+0xa4" kind="loop" limit="0" name="loop at matrixScale+0xa4"/>
+<flowfact addr="matrixAdd+0xe4" kind="loop" limit="0" name="loop at matrixAdd+0xe4"/>
+<flowfact addr="matrixAdd+0xce" kind="loop" limit="0" name="loop at matrixAdd+0xce"/>
+<flowfact addr="matrixSubtract+0xe4" kind="loop" limit="0" name="loop at matrixSubtract+0xe4"/>
+<flowfact addr="matrixSubtract+0xce" kind="loop" limit="0" name="loop at matrixSubtract+0xce"/>
+<flowfact addr="matrixCopy+0x30" kind="loop" limit="0" name="loop at matrixCopy+0x30"/>
+<flowfact addr="matrixCopy+0x26" kind="loop" limit="0" name="loop at matrixCopy+0x26"/>
+<flowfact addr="__divdf3+0x8c" kind="loop" limit="0" name="loop at __divdf3+0x8c"/>
+<flowfact addr="0x00205c34" kind="loop" limit="0" name="loop at 0x00205c34"/>
+<flowfact addr="0x00205c58" kind="loop" limit="0" name="loop at 0x00205c58"/>
+</flowfacts>
+<unresolved>
+<control address="2117502" kind="2" name="matrixScale + 0xf6 "/>
+</unresolved>
+</task>
+<task addr="2114476" checksum="20a05a88" label="user_1ms_isr_type2" name="user_1ms_isr_type2">
+<flowfacts/>
+<unresolved>
+<control address="2112392" kind="2" name="00203b88 "/>
+<control address="2098160" kind="0" name="__start_dispatch_from_thumb - 0x5e70 "/>
+</unresolved>
+</task>
+<filter active="true" type="0" value="_"/>
+</program>
+<source-manager>
+<path value=".."/>
+<path value="."/>
+<path value="/"/>
+</source-manager>
+</wcet>
