@@ -159,17 +159,16 @@ void kalman(double zn) {
 TASK(Task3) {
     MotorPID(WSRotation, WSMOTOR1, 0);
     MotorPID(WSRotation, WSMOTOR2, 0);
-    //TerminateTask();
+    TerminateTask();
 }
 
 TASK(Task2) {
     if (enableTask2Flag) {
 
-        // S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
-        // S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
+        S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
+        S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
 
-        S32 left = 0;
-        S32 right = 0;
+
 
         if (left < RANGE_CLOSE && right < RANGE_CLOSE)
             prev = CENTER;
@@ -235,7 +234,7 @@ TASK(Task2) {
 				nxt_motor_set_speed(NXT_PORT_A, 0, 1);
         }
     }
-    //TerminateTask();
+    TerminateTask();
 }
 
 int motor_in_range(int range){
@@ -251,7 +250,7 @@ TASK(Task4) {
             resetCounter = 1;
         }
     }
-    //TerminateTask();
+    TerminateTask();
 }
 
 TASK(Task1)
@@ -281,11 +280,12 @@ TASK(Task1)
 
         display_clear(1);
         display_goto_xy(0, 0);
-        display_int((S32)x[0][0], 7);
+        display_int(WSRotation, 7);
 
         display_goto_xy(0, 1);
-        display_int((S32)x[1][0], 7);
-
+        display_int(nxt_motor_get_count(WSMOTOR1), 7);
+		        display_goto_xy(0, 2);
+        display_int(nxt_motor_get_count(WSMOTOR2), 7);
         display_goto_xy(0, 3);
         display_int((int)(P[0][0] * 100), 7);
         display_goto_xy(0, 4);
