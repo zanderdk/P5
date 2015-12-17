@@ -39,6 +39,8 @@
 
 #define VK 8.0
 
+#define off(X,Y) ((X/12.0)/(1.0 + pow(2.718, -0.1*(Y-60))))
+
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
 DeclareTask(Task2);
@@ -55,6 +57,7 @@ S8 counter = 0;
 S32 shotFlag = 0;
 U8 enableTask2Flag = 0;
 long double determinant = 0;
+long double d = 0;
 double P[2][2] = {{0.4, 0.0}, {0.0, 30.0}};
 U8 resetCounter = 0;
 U32 last = 0;
@@ -153,7 +156,8 @@ void kalman(double zn) {
     matrixMultiply(2, 2, 2, 1, a, x, x);
     matrixMultiply(2, 2, 2, 2, a, P, P);
     matrixMultiply(2, 2, 2, 2, P, aT, P);
-    determinant = matrixDeterminant(2, 2, P) * 10000.0;
+    d = matrixDeterminant(2, 2, P);
+    determinant = p * 10000.0;
 }
 
 TASK(Task3) {
@@ -228,7 +232,7 @@ TASK(Task2) {
 			S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
 			if((motor_pos <= 100) && (motor_pos >= -45) ){
 				targetSeenFlag = 1;
-				MotorPID(((U32)x[0][0]), NXT_PORT_A, 1);
+				MotorPID(((U32)x[0][0]) + off(x[1][0], 1.0/d), NXT_PORT_A, 1);
 			}
 			else
 				nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -238,8 +242,8 @@ TASK(Task2) {
 }
 
 int motor_in_range(int range){
-    return (-nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0]) - range &&
-            -nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0]) + range);
+    return (-nxt_motor_get_count(NXT_PORT_A) > ((S32)x[0][0] + off(x[1][0], 1.0/d)) - range &&
+            -nxt_motor_get_count(NXT_PORT_A) < ((S32)x[0][0] + off(x[1][0], 1.0/d)) + range);
 }
 
 TASK(Task4) {
