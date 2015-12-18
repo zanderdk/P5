@@ -62,7 +62,8 @@ double P[2][2] = {{0.4, 0.0}, {0.0, 30.0}};
 U8 resetCounter = 0;
 U32 last = 0;
 S32 offset = 0;
-
+S32 kal = 0;
+double K[2][1] = {{0.0}, {0.0}};
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
 void user_1ms_isr_type2(void) {
@@ -72,6 +73,19 @@ void user_1ms_isr_type2(void) {
     if (ercd != E_OK) {
         ShutdownOS(ercd);
     }
+}
+
+
+void bt_data_logger(void)
+{
+	static U8 data_log_buffer[16];
+
+	*((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
+	*((S32 *)(&data_log_buffer[4]))  = (S32)kal;
+	*((S32 *)(&data_log_buffer[8]))  = (S32)K[0][0];
+	*((S32 *)(&data_log_buffer[12]))  = (S32)K[1][0];
+		
+	ecrobot_send_bt(data_log_buffer, 0, 16);
 }
 
 void reset() {
@@ -126,7 +140,6 @@ void kalman(double zn) {
     double hT[2][1] = {{1.0}, {0.0}};
     double a[2][2] = {{1.0, t}, {0.0, 1.0}};
     double aT[2][2] = {{1.0, 0.0}, {t, 1.0}};
-    double K[2][1] = {{0.0}, {0.0}};
     double y[2][1] = {{0.0}, {0.0}};
     double temp[1][2] = {{0.0, 0.0}};
     double temp2v = 0.0;
@@ -225,6 +238,8 @@ TASK(Task2) {
         else if (prev != UNKNOWN) {
             kalmanReading += (double)(-nxt_motor_get_count(NXT_PORT_A));
 
+            kal = (S32)kalmanReading;
+
             kalman(kalmanReading);
             S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
             if ((motor_pos <= 100) && (motor_pos >= -45) ) {
@@ -296,7 +311,10 @@ TASK(Task1) {
         display_goto_xy(0, 6);
         display_int((int)(P[0][1] * 100), 7);
         display_update();
+        
+        bt_data_logger();
 
-        systick_wait_ms(100);
+
+        systick_wait_ms(20);
     }
 }
