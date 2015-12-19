@@ -40,7 +40,7 @@
 
 #define VK 8.0
 
-#define off(X,Y) ((X/11.0)/(1.0 + pow(2.718, -0.01*(Y-60))))
+#define off(X,Y) ((X/13.0)/(1.0 + pow(2.718, -0.01*((1/Y)-60))))
 
 DeclareCounter(SysTimerCnt);
 DeclareTask(Task1);
@@ -51,14 +51,14 @@ DeclareTask(Task4);
 U32 WSRotation = 0;
 S8 resetRot = 0;
 double kalmanReading = 0;
-double x[2][1] = {{ -40.0}, {70.0}};
+double x[2][1] = {{ -40.0}, {50.0}};
 S8 targetSeenFlag = 0;
 S8 prev = UNKNOWN;
 S8 counter = 0;
 S32 shotFlag = 0;
 U8 enableTask2Flag = 0;
 long double d = 11;
-double P[2][2] = {{0.4, 0.0}, {0.0, 30.0}};
+double P[2][2] = {{1000.0, 0.0}, {0.0, 1000.0}};
 U8 resetCounter = 0;
 U32 last = 0;
 S32 offset = 0;
@@ -76,22 +76,21 @@ void user_1ms_isr_type2(void) {
 }
 
 
-void bt_data_logger(void)
-{
-	static U8 data_log_buffer[16];
+void bt_data_logger(void) {
+    static U8 data_log_buffer[16];
 
-	*((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
-	*((S32 *)(&data_log_buffer[4]))  = (S32)kal;
-	*((S32 *)(&data_log_buffer[8]))  = (S32)K[0][0];
-	*((S32 *)(&data_log_buffer[12]))  = (S32)K[1][0];
-		
-	ecrobot_send_bt(data_log_buffer, 0, 16);
+    *((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
+    *((S32 *)(&data_log_buffer[4]))  = (S32)kal;
+    *((S32 *)(&data_log_buffer[8]))  = (S32)K[0][0];
+    *((S32 *)(&data_log_buffer[12]))  = (S32)K[1][0];
+
+    ecrobot_send_bt(data_log_buffer, 0, 16);
 }
 
 void reset() {
     kalmanReading = 0;
     x[0][0] = -40.0;
-    x[1][0] = 70.0;
+    x[1][0] = 50.0;
     targetSeenFlag = 0;
     prev = UNKNOWN;
     counter = 0;
@@ -100,10 +99,10 @@ void reset() {
     shotFlag = 0;
     last = 0;
     offset = 0;
-    P[0][0] = 0.4;
+    P[0][0] = 1000.0;
     P[0][1] = 0.0;
     P[1][0] = 0.0;
-    P[1][1] = 30.0;
+    P[1][1] = 1000.0;
     nxt_motor_set_count(NXT_PORT_A, 0);
 }
 
@@ -216,9 +215,9 @@ TASK(Task2) {
         else if (prev == RIGHT_3 || prev == RIGHT_2)
             kalmanReading = -20.74;
         else if (prev == LEFT_4)
-            kalmanReading = 17.37;
+            kalmanReading = 30.0;
         else if (prev == RIGHT_4)
-            kalmanReading = -30.0;
+            kalmanReading = -20.74;
         else if (prev == UNKNOWN)
             nxt_motor_set_speed(NXT_PORT_A, 0, 0);
         else if (prev == CENTER)
@@ -244,8 +243,8 @@ TASK(Task2) {
             S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
             if ((motor_pos <= 100) && (motor_pos >= -45) ) {
                 targetSeenFlag = 1;
-                offset = (S32)off(x[1][0], 1.0 / d);
-                offset = (offset == 0) ? 3 : offset;
+                offset = (S32)off(x[1][0], d);
+                offset = (offset == 0) ? 2 : offset;
                 MotorPID((U32) (x[0][0] + offset), NXT_PORT_A, 1);
             } else
                 nxt_motor_set_speed(NXT_PORT_A, 0, 1);
@@ -261,6 +260,7 @@ int motor_in_range(int range) {
 
 TASK(Task4) {
     if (targetSeenFlag) {
+
         cock();
         if (-nxt_motor_get_count(NXT_PORT_A) > 30 && !shotFlag && motor_in_range(3)) {
             shotFlag = fire();
@@ -271,7 +271,7 @@ TASK(Task4) {
 }
 
 TASK(Task1) {
-    resetTowerTo(30);
+    resetTowerTo(35);
     reset();
     enableTask2Flag = 1;
 
@@ -311,10 +311,10 @@ TASK(Task1) {
         display_goto_xy(0, 6);
         display_int((int)(P[0][1] * 100), 7);
         display_update();
-        
+
         bt_data_logger();
 
 
-        systick_wait_ms(20);
+        systick_wait_ms(100);
     }
 }
