@@ -18,8 +18,8 @@
       /* Definition of application mode */
       APPMODE appmode1{};
 
-      /* Definition of Task3 */
-      TASK Task3
+      /* Definition of WeaponSystemTask */
+      TASK WeaponSystemTask
       {
         AUTOSTART = FALSE;
         PRIORITY = 3; /* Smaller value means lower priority */
@@ -28,8 +28,8 @@
         STACKSIZE = 512; /* Stack size */
       };
 
-      /* Definition of Task4 */
-      TASK Task4
+      /* Definition of ShootingTask */
+      TASK ShootingTask
       {
         AUTOSTART = FALSE;
         PRIORITY = 2; /* Smaller value means lower priority */
@@ -38,8 +38,8 @@
         STACKSIZE = 512; /* Stack size */
       };
 
-      /* Definition of Task2 */
-      TASK Task2
+      /* Definition of KalmanTask */
+      TASK KalmanTask
       {
         AUTOSTART = FALSE;
         PRIORITY = 3; /* Smaller value means lower priority */
@@ -49,7 +49,7 @@
       };
 
       /* Definition of OSEK_Task_Background */
-      TASK Task1
+      TASK BackgroundTask
       {
         AUTOSTART = TRUE
         {
@@ -68,18 +68,18 @@
     TICKSPERBASE = 1; /* One tick is equal to 1msec */
   };
 
-  /* Definition of Task1 execution timing */
+  /* Definition of BackgroundTask execution timing */
   ALARM cyclic_alarm1
   {
     COUNTER = SysTimerCnt;
     ACTION = ACTIVATETASK
     {
-      TASK = Task2;
+      TASK = KalmanTask;
     };
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 10; /* Task2 is executed every  x msec */
+      CYCLETIME = 10; /* KalmanTask is executed every  x msec */
       APPMODE = appmode1;
     };
   };
@@ -89,12 +89,12 @@
     COUNTER = SysTimerCnt;
     ACTION = ACTIVATETASK
     {
-      TASK = Task3;
+      TASK = WeaponSystemTask;
     };
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 20; /* Task3 is executed every  x msec */
+      CYCLETIME = 20; /* WeaponSystemTask is executed every  x msec */
       APPMODE = appmode1;
     };
   };
@@ -104,12 +104,12 @@
     COUNTER = SysTimerCnt;
     ACTION = ACTIVATETASK
     {
-      TASK = Task4;
+      TASK = ShootingTask;
     };
     AUTOSTART = TRUE
     {
       ALARMTIME = 1;
-      CYCLETIME = 20; /* Task3 is executed every  x msec */
+      CYCLETIME = 20; /* WeaponSystemTask is executed every  x msec */
       APPMODE = appmode1;
     };
   };

@@ -43,26 +43,25 @@
 #define off(X,Y) ((X/13.0)/(1.0 + pow(2.718, -0.01*((1/Y)-60))))
 
 DeclareCounter(SysTimerCnt);
-DeclareTask(Task1);
-DeclareTask(Task2);
-DeclareTask(Task3);
-DeclareTask(Task4);
+DeclareTask(BackgroundTask);
+DeclareTask(KalmanTask);
+DeclareTask(WeaponSystemTask);
+DeclareTask(ShootingTask);
 
 U32 WSRotation = 0;
-S8 resetRot = 0;
+S8 resetRotation = 0;
 double kalmanReading = 0;
-double x[2][1] = {{ -40.0}, {50.0}};
+double x[2][1] = {{ -42.0}, {50.0}};
 S8 targetSeenFlag = 0;
 S8 prev = UNKNOWN;
-S8 counter = 0;
-S32 shotFlag = 0;
-U8 enableTask2Flag = 0;
+S8 startCounter = 0;
+S32 shootFlag = 0;
+U8 enableKalmanTaskFlag = 0;
 long double d = 11;
-double P[2][2] = {{1000.0, 0.0}, {0.0, 1000.0}};
+double P[2][2] = {{0.42, 0.0}, {0.0, 900.0}};
 U8 resetCounter = 0;
-U32 last = 0;
+U32 lastTimeStep = 0;
 S32 offset = 0;
-S32 kal = 0;
 double K[2][1] = {{0.0}, {0.0}};
 
 /* nxtOSEK hook to be invoked from an ISR in category 2 */
@@ -76,33 +75,22 @@ void user_1ms_isr_type2(void) {
 }
 
 
-void bt_data_logger(void) {
-    static U8 data_log_buffer[16];
-
-    *((U32 *)(&data_log_buffer[0]))  = (U32)systick_get_ms();
-    *((S32 *)(&data_log_buffer[4]))  = (S32)kal;
-    *((S32 *)(&data_log_buffer[8]))  = (S32)K[0][0];
-    *((S32 *)(&data_log_buffer[12]))  = (S32)K[1][0];
-
-    ecrobot_send_bt(data_log_buffer, 0, 16);
-}
-
 void reset() {
     kalmanReading = 0;
-    x[0][0] = -40.0;
+    x[0][0] = -42.0;
     x[1][0] = 50.0;
     targetSeenFlag = 0;
     prev = UNKNOWN;
-    counter = 0;
-    enableTask2Flag = 0;
+    startCounter = 0;
+    enableKalmanTaskFlag = 0;
     d = 11;
-    shotFlag = 0;
-    last = 0;
+    shootFlag = 0;
+    lastTimeStep = 0;
     offset = 0;
-    P[0][0] = 1000.0;
+    P[0][0] = 0.42;
     P[0][1] = 0.0;
     P[1][0] = 0.0;
-    P[1][1] = 1000.0;
+    P[1][1] = 900.0;
     nxt_motor_set_count(NXT_PORT_A, 0);
 }
 
@@ -132,9 +120,9 @@ void kalman(double zn) {
     /* Constants and matrices used for kalman calculations */
     static double R = VK;
     static double I[2][2] = {{1.0, 0.0}, {0.0, 1.0}};
-    U32 current = systick_get_ms();
-    double t = (last == 0) ? 0.1 : (double)(current - last) / 1000.0;
-    last = current;
+    U32 currentTimeStep = systick_get_ms();
+    double t = (lastTimeStep == 0) ? 0.1 : (double)(currentTimeStep - lastTimeStep) / 1000.0;
+    lastTimeStep = currentTimeStep;
     double h[1][2] = {{1.0, 0.0}};
     double hT[2][1] = {{1.0}, {0.0}};
     double a[2][2] = {{1.0, t}, {0.0, 1.0}};
@@ -172,14 +160,14 @@ void kalman(double zn) {
 
 }
 
-TASK(Task3) {
+TASK(WeaponSystemTask) {
     MotorPID(WSRotation, WSMOTOR1, 0);
     MotorPID(WSRotation, WSMOTOR2, 0);
     TerminateTask();
 }
 
-TASK(Task2) {
-    if (enableTask2Flag) {
+TASK(KalmanTask) {
+    if (enableKalmanTaskFlag) {
 
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
@@ -206,7 +194,7 @@ TASK(Task2) {
             prev = RIGHT_4;
         else {
             prev = UNKNOWN;
-            counter = 0;
+            startCounter = 0;
         }
 
         if (prev == LEFT_3 || prev == LEFT_2)
@@ -226,15 +214,13 @@ TASK(Task2) {
         else
             kalmanReading = -9.78;
 
-        if (counter < 10 && prev != UNKNOWN) {
-            counter++;
+        if (startCounter < 10 && prev != UNKNOWN) {
+            startCounter++;
             prev = UNKNOWN;
         }
 
         else if (prev != UNKNOWN) {
             kalmanReading += (double)(-nxt_motor_get_count(NXT_PORT_A));
-
-            kal = (S32)kalmanReading;
 
             kalman(kalmanReading);
             S32 motor_pos = -nxt_motor_get_count(NXT_PORT_A);
@@ -255,36 +241,36 @@ int motor_in_range(int range) {
             -nxt_motor_get_count(NXT_PORT_A) < ((S32)(x[0][0]) + offset + range));
 }
 
-TASK(Task4) {
+TASK(ShootingTask) {
     if (targetSeenFlag) {
 
         cock();
-        if (-nxt_motor_get_count(NXT_PORT_A) > 30 && !shotFlag && motor_in_range(3)) {
-            shotFlag = fire();
+        if (-nxt_motor_get_count(NXT_PORT_A) > 30 && !shootFlag && motor_in_range(3)) {
+            shootFlag = fire();
             resetCounter = 1;
         }
     }
     TerminateTask();
 }
 
-TASK(Task1) {
+TASK(BackgroundTask) {
     resetTowerTo(35);
     reset();
-    enableTask2Flag = 1;
+    enableKalmanTaskFlag = 1;
 
     while (1) {
         if (resetCounter == 6) {
-            enableTask2Flag = 0;
+            enableKalmanTaskFlag = 0;
             targetSeenFlag = 0;
             WSRotation -= 150;
-            resetTowerTo(0 - resetRot);
-            resetRot -= -nxt_motor_get_count(NXT_PORT_A);
+            resetTowerTo(0 - resetRotation);
+            resetRotation -= -nxt_motor_get_count(NXT_PORT_A);
         }
 
         if (resetCounter == 12) {
             resetCounter = 0;
             reset();
-            enableTask2Flag = 1;
+            enableKalmanTaskFlag = 1;
         }
 
         if (resetCounter > 0) {
@@ -308,9 +294,6 @@ TASK(Task1) {
         display_goto_xy(0, 6);
         display_int((int)(P[0][1] * 100), 7);
         display_update();
-
-        bt_data_logger();
-
 
         systick_wait_ms(100);
     }
