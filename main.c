@@ -145,6 +145,12 @@ void kalman(double zn) {
     double (*temp2)[1] = (double ( *)[1])(&temp2v);
     double temp3[2][2] = {{0.0, 0.0}, {0.0, 0.0}};
 
+    /* Project into timestep k+1 */
+    matrixMultiply(2, 2, 2, 1, a, x, x);
+    matrixMultiply(2, 2, 2, 2, a, P, P);
+    matrixMultiply(2, 2, 2, 2, P, aT, P);
+    d = matrixDeterminant(2, 2, P);
+
     /* Calculate kalman gain in K */
     matrixMultiply(1, 2, 2, 2, h, P, temp);
     matrixMultiply(1, 2, 2, 1, temp, hT, temp2);
@@ -164,11 +170,6 @@ void kalman(double zn) {
     matrixSubtract(2, 2, I, temp3, temp3);
     matrixMultiply(2, 2, 2, 2, temp3, P, P);
 
-    /* Project into timestep k+1 */
-    matrixMultiply(2, 2, 2, 1, a, x, x);
-    matrixMultiply(2, 2, 2, 2, a, P, P);
-    matrixMultiply(2, 2, 2, 2, P, aT, P);
-    d = matrixDeterminant(2, 2, P);
 }
 
 TASK(Task3) {
@@ -182,8 +183,6 @@ TASK(Task2) {
 
         S32 left = (S32)ecrobot_get_dist_sensor(LEFT_SENSOR);
         S32 right = (S32)ecrobot_get_dist_sensor(RIGHT_SENSOR);
-
-
 
         if (left < RANGE_CLOSE && right < RANGE_CLOSE)
             prev = CENTER;
@@ -226,8 +225,6 @@ TASK(Task2) {
             kalmanReading = 7.52;
         else
             kalmanReading = -9.78;
-
-
 
         if (counter < 10 && prev != UNKNOWN) {
             counter++;
