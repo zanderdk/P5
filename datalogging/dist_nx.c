@@ -14,6 +14,17 @@ double func(long double x, long double a, long double b){
     return a/(pow(x, b));
 }
 
+double calc2(long double x) {
+    if(x > 1226.87)
+        return func(x, 581127.6081355726, 1.1078247500891030605522820291876226945); 
+    if(x > 835.973) 
+        return func(x, 1656333.5741040043, 1.25345796169767853357774826542185982966); 
+    
+    long double val = func(x, 382502193234270160000000.0, 7.1927674628603778680252272435543044909);
+    return (val > 800)? 800 : val;
+}
+
+
 double calc(long double x) {
     if(x > 1193.3)
         return func(x, 775273, 1.152850108742073); 
@@ -25,7 +36,7 @@ double calc(long double x) {
         return func(x, 1236340000000000000, 5.442282287396021);
     
     long double val = func(x, 10000700000000, 3.632572817825240);
-    return (val > 900)? 900 : val;
+    return (val > 800)? 800 : val;
 }
 
 void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range)
@@ -73,10 +84,13 @@ double ecrobot_get_dist_sensor(U8 port_id)
     
     dist[port_id] = (double)((data[port_id][1] << 8) | data[port_id][0]);
 
+    if(!sen[port_id])
+        dist[port_id] = calc2(dist[port_id]);
+
     if(sen[port_id])
         dist[port_id] = calc(dist[port_id]);
 
-    ecrobot_read_i2c(port_id, 0x03, 0x42 + sen[port_id]*2 , data[port_id], 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x44 , data[port_id], 2);
 
     return dist[port_id];
 }

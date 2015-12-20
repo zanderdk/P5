@@ -204,7 +204,7 @@ task tail()
 		<location id="id10" x="192" y="128">
 			<name x="255" y="93">Free</name>
 		</location>
-		<init ref="id4"/>
+		<init ref="id5"/>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id6"/>
@@ -243,8 +243,7 @@ task tail()
 			<label kind="select" x="-501" y="263">e : int_id</label>
 			<label kind="guard" x="-501" y="280">idToTask(e).P &gt; front().P</label>
 			<label kind="synchronisation" x="-501" y="297">ready[e]?</label>
-			<label kind="assignment" x="-501" y="314">enqueue(idToTask(e)),
- incSwichLen()</label>
+			<label kind="assignment" x="-501" y="314">enqueue(idToTask(e))</label>
 			<nail x="-289" y="323"/>
 			<nail x="-382" y="229"/>
 		</transition>
@@ -319,13 +318,13 @@ incSwichLen()</label>
 			<nail x="408" y="127"/>
 		</transition>
 	</template>
-	<system>const task t2 = {2, 3, 20, 4};
+	<system>const task t2 = {2, 1, 20, 1};
 task2 = Task(t2);
-const task t1 = {1, 2, 40, 8};
+const task t1 = {1, 2, 20, 3};
 task1 = Task(t1);
-const task t0 = {0, 1, 80, 30};
+const task t0 = {0, 3, 10, 5};
 task0 = Task(t0);
-const task tasks[N] = {t2, t1, t0};
+const task tasks[N] = {t0, t1, t2};
 
 S = Scheduler(tasks);
 
