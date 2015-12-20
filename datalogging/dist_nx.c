@@ -36,7 +36,7 @@ double calc(long double x) {
         return func(x, 1236340000000000000, 5.442282287396021);
     
     long double val = func(x, 10000700000000, 3.632572817825240);
-    return (val > 800)? 800 : val;
+    return (val > 900)? 900 : val;
 }
 
 void ecrobot_init_obstical_detection_sensor(U8 port_id, U8 range)
@@ -84,13 +84,10 @@ double ecrobot_get_dist_sensor(U8 port_id)
     
     dist[port_id] = (double)((data[port_id][1] << 8) | data[port_id][0]);
 
-    if(!sen[port_id])
-        dist[port_id] = calc2(dist[port_id]);
-
     if(sen[port_id])
         dist[port_id] = calc(dist[port_id]);
 
-    ecrobot_read_i2c(port_id, 0x03, 0x44 , data[port_id], 2);
+    ecrobot_read_i2c(port_id, 0x03, 0x42 + sen[port_id]*2 , data[port_id], 2);
 
     return dist[port_id];
 }
