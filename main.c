@@ -121,7 +121,7 @@ void kalman(double zn) {
     static double R = VK;
     static double I[2][2] = {{1.0, 0.0}, {0.0, 1.0}};
     U32 currentTimeStep = systick_get_ms();
-    double t = (lastTimeStep == 0) ? 0.01 : (double)(currentTimeStep - lastTimeStep) / 1000.0;
+    double t = (lastTimeStep == 0) ? 0.1 : (double)(currentTimeStep - lastTimeStep) / 1000.0;
     lastTimeStep = currentTimeStep;
     double h[1][2] = {{1.0, 0.0}};
     double hT[2][1] = {{1.0}, {0.0}};
