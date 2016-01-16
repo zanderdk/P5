@@ -102,7 +102,7 @@ blocked = false</label>
 		</transition>
 	</template>
 	<template>
-		<name x="40" y="16">Scheduler</name>
+		<name x="40" y="16">SchedulerTemplate</name>
 		<parameter>const task tasks[N]</parameter>
 		<declaration>const task sta[N] = tasks;
 task list[N] =tasks;
@@ -204,7 +204,7 @@ task tail()
 		<location id="id10" x="192" y="128">
 			<name x="255" y="93">Free</name>
 		</location>
-		<init ref="id4"/>
+		<init ref="id5"/>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id6"/>
@@ -243,8 +243,7 @@ task tail()
 			<label kind="select" x="-501" y="263">e : int_id</label>
 			<label kind="guard" x="-501" y="280">idToTask(e).P &gt; front().P</label>
 			<label kind="synchronisation" x="-501" y="297">ready[e]?</label>
-			<label kind="assignment" x="-501" y="314">enqueue(idToTask(e)),
- incSwichLen()</label>
+			<label kind="assignment" x="-501" y="314">enqueue(idToTask(e))</label>
 			<nail x="-289" y="323"/>
 			<nail x="-382" y="229"/>
 		</transition>
@@ -319,24 +318,24 @@ incSwichLen()</label>
 			<nail x="408" y="127"/>
 		</transition>
 	</template>
-	<system>const task t2 = {2, 3, 20, 4};
-task2 = Task(t2);
-const task t1 = {1, 2, 40, 8};
-task1 = Task(t1);
-const task t0 = {0, 1, 80, 30};
-task0 = Task(t0);
-const task tasks[N] = {t2, t1, t0};
+	<system>const task t2 = {2, 2, 20, 1};
+ShootingTask = Task(t2);
+const task t1 = {1, 1, 20, 3};
+WeaponSystemTask = Task(t1);
+const task t0 = {0, 3, 10, 5};
+KalmanTask = Task(t0);
+const task tasks[N] = {t0, t2, t1};
 
-S = Scheduler(tasks);
+Scheduler = SchedulerTemplate(tasks);
 
 system 
-       task0, task1, task2, S;
+       KalmanTask, WeaponSystemTask, ShootingTask, Scheduler;
 
 gantt {
-    task0 :   task0.Idle -&gt; 2,  task0.Ready -&gt; 6, task0.Running -&gt; 1, task0.Ready &amp;&amp; task0.blocked -&gt;3, task0.Error-&gt;0; 
-    task1 :   task1.Idle -&gt; 2,  task1.Ready -&gt; 6, task1.Running -&gt; 1, task1.Ready &amp;&amp; task1.blocked -&gt;3, task1.Error-&gt;0; 
-    task2 :   task2.Idle -&gt; 2,  task2.Ready -&gt; 6, task2.Running -&gt; 1, task2.Ready &amp;&amp; task2.blocked -&gt;3, task2.Error-&gt;0;
-    S     :   S.Free -&gt; 2, S.Occ -&gt; 1, S.SwitchingRunning || S.SwitchingFree -&gt; 3;
+    KalmanTask :   KalmanTask.Idle -&gt; 2,  KalmanTask.Ready -&gt; 6, KalmanTask.Running -&gt; 1, KalmanTask.Ready &amp;&amp; KalmanTask.blocked -&gt;3, KalmanTask.Error-&gt;0; 
+    WeaponSystemTask :   WeaponSystemTask.Idle -&gt; 2,  WeaponSystemTask.Ready -&gt; 6, WeaponSystemTask.Running -&gt; 1, WeaponSystemTask.Ready &amp;&amp; WeaponSystemTask.blocked -&gt;3, WeaponSystemTask.Error-&gt;0; 
+    ShootingTask :   ShootingTask.Idle -&gt; 2,  ShootingTask.Ready -&gt; 6, ShootingTask.Running -&gt; 1, ShootingTask.Ready &amp;&amp; ShootingTask.blocked -&gt;3, ShootingTask.Error-&gt;0;
+    Scheduler     :   Scheduler.Free -&gt; 2, Scheduler.Occ -&gt; 1, Scheduler.SwitchingRunning || Scheduler.SwitchingFree -&gt; 3;
 }
 </system>
 	<queries>
