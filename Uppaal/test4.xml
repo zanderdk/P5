@@ -340,7 +340,13 @@ gantt {
 </system>
 	<queries>
 		<query>
-			<formula>A[] !task0.Error &amp;&amp; !task1.Error &amp;&amp; !task2.Error
+			<formula>A[] not deadlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] !ShootingTask.Error &amp;&amp; !WeaponSystemTask.Error &amp;&amp; !KalmanTask.Error
 			</formula>
 			<comment>
 			</comment>
